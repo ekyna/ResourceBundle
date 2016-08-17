@@ -3,6 +3,10 @@
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
+    <parameters>
+        <parameter key="ekyna_resource.configuration.class">Ekyna\Component\Resource\Configuration\Configuration</parameter>
+    </parameters>
+
     <services>
 
         <!-- Resource event dispatcher -->
@@ -15,9 +19,25 @@
         <service id="ekyna_resource.doctrine.orm.entity_listener"
                  class="Ekyna\Component\Resource\Doctrine\ORM\Listener\EntityListener"
                  autowire="true">
-            <argument type="service" id="ekyna_admin.pool_registry"/>
+            <argument type="service" id="ekyna_resource.configuration_registry"/>
             <argument type="service" id="ekyna_resource.event_dispatcher"/>
             <tag name="doctrine.event_subscriber"/>
+        </service>
+        <!-- Translable listener -->
+        <service id="ekyna_resource.doctrine.orm.translatable_listener"
+                 class="Ekyna\Component\Resource\Doctrine\ORM\Listener\TranslatableListener">
+            <argument type="service" id="ekyna_core.locale_provider.request" />
+            <argument>%ekyna_resource.translation_mapping%</argument>
+            <tag name="doctrine.event_subscriber" connection="default" priority="99" />
+        </service>
+
+        <!-- Pool Factory / Registry -->
+        <service id="ekyna_resource.configuration_factory"
+                 class="Ekyna\Component\Resource\Configuration\ConfigurationFactory" />
+        <service id="ekyna_resource.configuration_registry"
+                 class="Ekyna\Component\Resource\Configuration\ConfigurationRegistry">
+            <!-- Services with "ekyna_resource.configuration" tag -->
+            <argument type="collection" />
         </service>
 
     </services>

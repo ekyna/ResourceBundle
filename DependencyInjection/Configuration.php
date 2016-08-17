@@ -6,24 +6,69 @@ use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 /**
- * This is the class that validates and merges configuration from your app/config files.
- *
- * To learn more see {@link http://symfony.com/doc/current/cookbook/bundles/configuration.html}
+ * Class Configuration
+ * @package Ekyna\Bundle\ResourceBundle\DependencyInjection
+ * @author Étienne Dauvergne <contact@ekyna.com>
  */
 class Configuration implements ConfigurationInterface
 {
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function getConfigTreeBuilder()
     {
         $treeBuilder = new TreeBuilder();
         $rootNode = $treeBuilder->root('ekyna_resource');
 
-        // Here you should define the parameters that are allowed to
-        // configure your bundle. See the documentation linked above for
-        // more information on that topic.
+        $rootNode
+            ->children()
+                ->append($this->getResourcesSection())
+            ->end()
+        ;
 
         return $treeBuilder;
+    }
+
+    /**
+     * Returns the resources configuration definition.
+     *
+     * @return \Symfony\Component\Config\Definition\Builder\NodeDefinition
+     */
+    private function getResourcesSection()
+    {
+        $builder = new TreeBuilder();
+        $node = $builder->root('resources');
+
+        $node
+            ->useAttributeAsKey('prefix') // TODO rename as 'namespace'
+            ->prototype('array')
+                ->useAttributeAsKey('name')
+                ->prototype('array')
+                    ->children()
+                        ->variableNode('templates')->end() // TODO normalization ?
+                        ->scalarNode('entity')->isRequired()->cannotBeEmpty()->end()
+                        ->scalarNode('controller')->end()
+                        ->scalarNode('repository')->end()
+                        ->scalarNode('operator')->end()
+                        ->scalarNode('event')->end()
+                        ->scalarNode('form')->isRequired()->cannotBeEmpty()->end()
+                        ->scalarNode('table')->isRequired()->cannotBeEmpty()->end()
+                        ->scalarNode('parent')->end()
+                        ->arrayNode('translation')
+                            ->children()
+                                ->scalarNode('entity')->end()
+                                ->scalarNode('repository')->end()
+                                ->arrayNode('fields')
+                                    ->prototype('scalar')->end()
+                                    ->defaultValue([])
+                                ->end()
+                            ->end()
+                        ->end()
+                    ->end()
+                ->end()
+            ->end()
+        ;
+
+        return $node;
     }
 }
