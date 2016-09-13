@@ -157,15 +157,27 @@ class ConfigurationBuilder
                 return true;
             };
             $validOperator = function ($class) use ($classExistsAndImplements) {
+                if (null === $class) {
+                    return true;
+                }
                 return $classExistsAndImplements($class, self::OPERATOR_INTERFACE);
             };
             $validController = function ($class) use ($classExistsAndImplements) {
+                if (null === $class) {
+                    return true;
+                }
                 return $classExistsAndImplements($class, self::CONTROLLER_INTERFACE);
             };
             $validForm = function ($class) use ($classExistsAndImplements) {
+                if (null === $class) {
+                    return true;
+                }
                 return $classExistsAndImplements($class, self::FORM_INTERFACE);
             };
             $validTable = function ($class) use ($classExistsAndImplements) {
+                if (null === $class) {
+                    return true;
+                }
                 return $classExistsAndImplements($class, self::TABLE_INTERFACE);
             };
             $validEvent = function ($class) use ($classExistsAndImplements) {
@@ -196,8 +208,8 @@ class ConfigurationBuilder
                 ->setAllowedTypes('operator',    'string')
                 ->setAllowedTypes('controller',  'string')
                 ->setAllowedTypes('templates',   ['null', 'string', 'array'])
-                ->setAllowedTypes('form',        'string')
-                ->setAllowedTypes('table',       'string')
+                ->setAllowedTypes('form',        ['null', 'string'])
+                ->setAllowedTypes('table',       ['null', 'string'])
                 ->setAllowedTypes('event',       ['null', 'string'])
                 ->setAllowedTypes('parent',      ['null', 'string'])
                 ->setAllowedTypes('translation', ['null', 'array'])
@@ -414,6 +426,10 @@ class ConfigurationBuilder
      */
     private function createFormDefinition()
     {
+        if (null === $this->options['form']) {
+            return;
+        }
+
         $id = $this->getServiceId('form_type');
         if (!$this->container->has($id)) {
             $definition = new DI\Definition($this->getServiceClass('form'));
@@ -430,6 +446,10 @@ class ConfigurationBuilder
      */
     private function createTableDefinition()
     {
+        if (null === $this->options['table']) {
+            return;
+        }
+
         $id = $this->getServiceId('table_type');
         if (!$this->container->has($id)) {
             $definition = new DI\Definition($this->getServiceClass('table'));
