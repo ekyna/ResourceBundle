@@ -1,0 +1,31 @@
+{
+    "name" : "ekyna/resource-bundle",
+    "description" : "Resource component integration",
+    "type" : "symfony-bundle",
+    "authors" : [
+        {
+            "name" : "Etienne Dauvergne",
+            "homepage" : "http://ekyna.com"
+        }
+    ],
+    "keywords" : [
+        "symfony2",
+        "resource",
+        "bundle"
+    ],
+    "homepage" : "https://github.com/ekyna/ResourceBundle",
+    "license" : [
+        "MIT"
+    ],
+    "require" : {
+        "php" : ">=5.4",
+        "symfony/framework-bundle" : "~3.0",
+        "ekyna/resource" : "0.6.x-dev",
+        "winzou/state-machine-bundle": "~0.2"
+    },
+    "autoload" : {
+        "psr-4" : {
+            "Ekyna\\Bundle\\ResourceBundle\\" : ""
+        }
+    }
+}

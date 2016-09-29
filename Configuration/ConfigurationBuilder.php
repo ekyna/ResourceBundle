@@ -5,9 +5,9 @@ namespace Ekyna\Bundle\ResourceBundle\Configuration;
 use Doctrine\Common\Inflector\Inflector;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Ekyna\Bundle\AdminBundle\Controller;
-use Ekyna\Bundle\AdminBundle\Event\ResourceEventInterface;
 use Ekyna\Component\Resource\Configuration\Configuration;
 use Ekyna\Component\Resource\Doctrine\ORM;
+use Ekyna\Component\Resource\Event\ResourceEventInterface;
 use Ekyna\Component\Resource\Operator;
 use Ekyna\Component\Table\TableTypeInterface;
 use Symfony\Component\DependencyInjection as DI;
@@ -290,10 +290,9 @@ class ConfigurationBuilder
                 'classes'   => [
                     'resource'  => $this->options['entity'],
                     'form_type' => $this->getServiceClass('form'), // TODO
-                    'event'     => $this->options['event'],
+                    'event'     => $this->options['event'], // TODO remove
                 ],
                 'templates' => $this->options['templates'],
-                //'templates' => $this->buildTemplateList($this->options['templates']),
             ];
 
             $definition = new DI\Definition(self::CONFIGURATION);
@@ -533,7 +532,7 @@ class ConfigurationBuilder
      */
     private function getEventDispatcherServiceId()
     {
-        return 'event_dispatcher';
+        return 'ekyna_resource.event_dispatcher';
     }
 
     /**

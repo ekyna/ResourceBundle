@@ -5,17 +5,39 @@
 
     <parameters>
         <parameter key="ekyna_resource.configuration.class">Ekyna\Component\Resource\Configuration\Configuration</parameter>
+        <parameter key="ekyna_resource.event.class">Ekyna\Component\Resource\Event\ResourceEvent</parameter> <!-- TODO move -->
     </parameters>
 
     <services>
+
+        <!-- Configuration factory -->
+        <service id="ekyna_resource.configuration_factory"
+                 class="Ekyna\Component\Resource\Configuration\ConfigurationFactory">
+            <argument>%ekyna_resource.event.class%</argument>
+        </service>
+
+        <!-- Configuration registry -->
+        <service id="ekyna_resource.configuration_registry"
+                 class="Ekyna\Component\Resource\Configuration\ConfigurationRegistry">
+            <argument type="collection" /><!-- "ekyna_resource.configuration" tagged service -->
+        </service>
 
         <!-- Resource event dispatcher -->
         <service id="ekyna_resource.event_dispatcher"
                  class="Ekyna\Bundle\ResourceBundle\Dispatcher\ResourceEventDispatcher">
             <argument type="service" id="service_container"/>
+            <call method="setConfigurationRegistry">
+                <argument type="service" id="ekyna_resource.configuration_registry"/>
+            </call>
         </service>
 
-        <!-- Doctrine entity listener -->
+        <!-- Doctrine ORM persistence helper -->
+        <service id="ekyna_resource.doctrine.orm.persistence_helper"
+                 class="Ekyna\Component\Resource\Doctrine\ORM\PersistenceHelper">
+            <argument type="service" id="doctrine.orm.default_entity_manager"/>
+        </service>
+
+        <!-- Doctrine ORM entity listener -->
         <service id="ekyna_resource.doctrine.orm.entity_listener"
                  class="Ekyna\Component\Resource\Doctrine\ORM\Listener\EntityListener"
                  autowire="true">
@@ -23,21 +45,13 @@
             <argument type="service" id="ekyna_resource.event_dispatcher"/>
             <tag name="doctrine.event_subscriber"/>
         </service>
-        <!-- Translable listener -->
+
+        <!-- Doctrine ORM translatable listener -->
         <service id="ekyna_resource.doctrine.orm.translatable_listener"
                  class="Ekyna\Component\Resource\Doctrine\ORM\Listener\TranslatableListener">
             <argument type="service" id="ekyna_core.locale_provider.request" />
             <argument>%ekyna_resource.translation_mapping%</argument>
             <tag name="doctrine.event_subscriber" connection="default" priority="99" />
-        </service>
-
-        <!-- Pool Factory / Registry -->
-        <service id="ekyna_resource.configuration_factory"
-                 class="Ekyna\Component\Resource\Configuration\ConfigurationFactory" />
-        <service id="ekyna_resource.configuration_registry"
-                 class="Ekyna\Component\Resource\Configuration\ConfigurationRegistry">
-            <!-- Services with "ekyna_resource.configuration" tag -->
-            <argument type="collection" />
         </service>
 
     </services>
