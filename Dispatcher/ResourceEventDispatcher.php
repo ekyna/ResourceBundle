@@ -47,4 +47,21 @@ class ResourceEventDispatcher extends ContainerAwareEventDispatcher implements R
 
         return null;
     }
+
+    /**
+     * Returns the resource event name.
+     *
+     * @param ResourceInterface $resource
+     * @param string            $suffix
+     *
+     * @return null|string
+     */
+    public function getResourceEventName(ResourceInterface $resource, $suffix)
+    {
+        if (null !== $configuration = $this->registry->findConfiguration($resource, false)) {
+            return sprintf('%s.%s', $configuration->getResourceId(), $suffix);
+        }
+
+        return null;
+    }
 }
