@@ -31,18 +31,25 @@
             </call>
         </service>
 
+        <!-- Resource event queue -->
+        <service id="ekyna_resource.event_queue"
+                 class="Ekyna\Component\Resource\Event\EventQueue"
+                 public="false">
+            <argument type="service" id="ekyna_resource.event_dispatcher"/>
+        </service>
+
         <!-- Doctrine ORM persistence helper -->
         <service id="ekyna_resource.doctrine.orm.persistence_helper"
                  class="Ekyna\Component\Resource\Doctrine\ORM\PersistenceHelper">
             <argument type="service" id="doctrine.orm.default_entity_manager"/>
+            <argument type="service" id="ekyna_resource.event_queue"/>
         </service>
 
         <!-- Doctrine ORM entity listener -->
         <service id="ekyna_resource.doctrine.orm.entity_listener"
-                 class="Ekyna\Component\Resource\Doctrine\ORM\Listener\EntityListener"
-                 autowire="true">
+                 class="Ekyna\Component\Resource\Doctrine\ORM\Listener\EntityListener">
             <argument type="service" id="ekyna_resource.configuration_registry"/>
-            <argument type="service" id="ekyna_resource.event_dispatcher"/>
+            <argument type="service" id="ekyna_resource.event_queue"/>
             <tag name="doctrine.event_subscriber"/>
         </service>
 
