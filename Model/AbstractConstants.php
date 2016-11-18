@@ -2,19 +2,15 @@
 
 namespace Ekyna\Bundle\ResourceBundle\Model;
 
-use Ekyna\Bundle\CoreBundle\Model\ConstantsInterface;
-
 /**
  * Class AbstractConstants
- * @package Ekyna\Bundle\CoreBundle\Model
+ * @package Ekyna\Bundle\ResourceBundle\Model
  * @author  Étienne Dauvergne <contact@ekyna.com>
  */
 abstract class AbstractConstants implements ConstantsInterface
 {
     /**
-     * Returns the constants.
-     *
-     * @return array
+     * @inheritdoc
      */
     public static function getConstants()
     {
@@ -22,24 +18,22 @@ abstract class AbstractConstants implements ConstantsInterface
     }
 
     /**
-     * Returns the constant choices.
-     *
-     * @return array
+     * @inheritdoc
      */
-    public static function getChoices()
+    public static function getChoices(array $filter = [])
     {
         $choices = [];
         foreach (static::getConfig() as $constant => $config) {
-            $choices[$config[0]] = $constant;
+            if (empty($filter) || !in_array($constant, $filter)) {
+                $choices[$config[0]] = $constant;
+            }
         }
 
         return $choices;
     }
 
     /**
-     * Returns the default constant choice.
-     *
-     * @return mixed
+     * @inheritdoc
      */
     public static function getDefaultChoice()
     {
@@ -51,11 +45,7 @@ abstract class AbstractConstants implements ConstantsInterface
     }
 
     /**
-     * Returns the label for the given constant.
-     *
-     * @param mixed $constant
-     *
-     * @return string
+     * @inheritdoc
      */
     public static function getLabel($constant)
     {
@@ -69,12 +59,7 @@ abstract class AbstractConstants implements ConstantsInterface
     }
 
     /**
-     * Returns whether the constant is valid or not.
-     *
-     * @param mixed   $constant
-     * @param boolean $throwException
-     *
-     * @return bool
+     * @inheritdoc
      */
     public static function isValid($constant, $throwException = false)
     {
