@@ -21,16 +21,16 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  * @package Ekyna\Bundle\ResourceBundle\DependencyInjection
  * @author  Étienne Dauvergne <contact@ekyna.com>
  *
- * @todo rename: This is much more than a "configuration builder"
- * @todo move: In DI folder
+ * @todo    rename: This is much more than a "configuration builder"
+ * @todo    move: In DI folder
  */
 class ConfigurationBuilder
 {
     const DEFAULT_CONTROLLER   = Controller\ResourceController::class;
     const CONTROLLER_INTERFACE = Controller\ResourceControllerInterface::class;
 
-    const DEFAULT_OPERATOR     = ORM\Operator\ResourceOperator::class;
-    const OPERATOR_INTERFACE   = Operator\ResourceOperatorInterface::class;
+    const DEFAULT_OPERATOR   = ORM\Operator\ResourceOperator::class;
+    const OPERATOR_INTERFACE = Operator\ResourceOperatorInterface::class;
 
     const DEFAULT_REPOSITORY   = ORM\ResourceRepository::class;
     const REPOSITORY_INTERFACE = ORM\ResourceRepositoryInterface::class;
@@ -38,12 +38,12 @@ class ConfigurationBuilder
     const TRANSLATABLE_DEFAULT_REPOSITORY   = ORM\TranslatableResourceRepository::class;
     const TRANSLATABLE_REPOSITORY_INTERFACE = ORM\TranslatableResourceRepositoryInterface::class;
 
-    const FORM_INTERFACE       = FormTypeInterface::class;
-    const TABLE_INTERFACE      = TableTypeInterface::class;
-    const EVENT_INTERFACE      = ResourceEventInterface::class;
+    const FORM_INTERFACE  = FormTypeInterface::class;
+    const TABLE_INTERFACE = TableTypeInterface::class;
+    const EVENT_INTERFACE = ResourceEventInterface::class;
 
-    const CONFIGURATION        = Configuration::class;
-    const CLASS_METADATA       = ClassMetadata::class;
+    const CONFIGURATION  = Configuration::class;
+    const CLASS_METADATA = ClassMetadata::class;
 
     /**
      * @var OptionsResolver
@@ -147,43 +147,50 @@ class ConfigurationBuilder
                 if (!class_exists($class)) {
                     throw new InvalidOptionsException(sprintf('Class %s does not exists.', $class));
                 }
+
                 return true;
             };
-            $classExistsAndImplements = function($class, $interface) use ($classExists) {
+            $classExistsAndImplements = function ($class, $interface) use ($classExists) {
                 $classExists($class);
                 if (!in_array($interface, class_implements($class))) {
                     throw new InvalidOptionsException(sprintf('Class %s must implement %s.', $class, $interface));
                 }
+
                 return true;
             };
             $validOperator = function ($class) use ($classExistsAndImplements) {
                 if (null === $class) {
                     return true;
                 }
+
                 return $classExistsAndImplements($class, self::OPERATOR_INTERFACE);
             };
             $validController = function ($class) use ($classExistsAndImplements) {
                 if (null === $class) {
                     return true;
                 }
+
                 return $classExistsAndImplements($class, self::CONTROLLER_INTERFACE);
             };
             $validForm = function ($class) use ($classExistsAndImplements) {
                 if (null === $class) {
                     return true;
                 }
+
                 return $classExistsAndImplements($class, self::FORM_INTERFACE);
             };
             $validTable = function ($class) use ($classExistsAndImplements) {
                 if (null === $class) {
                     return true;
                 }
+
                 return $classExistsAndImplements($class, self::TABLE_INTERFACE);
             };
             $validEvent = function ($class) use ($classExistsAndImplements) {
                 if (null === $class) {
                     return true;
                 }
+
                 return $classExistsAndImplements($class, self::EVENT_INTERFACE);
             };
 
@@ -202,26 +209,23 @@ class ConfigurationBuilder
                     'parent'      => null,
                     'translation' => null,
                 ])
-
-                ->setAllowedTypes('entity',      'string')
-                ->setAllowedTypes('repository',  ['null', 'string'])
-                ->setAllowedTypes('operator',    'string')
-                ->setAllowedTypes('controller',  'string')
-                ->setAllowedTypes('templates',   ['null', 'string', 'array'])
-                ->setAllowedTypes('form',        ['null', 'string'])
-                ->setAllowedTypes('table',       ['null', 'string'])
-                ->setAllowedTypes('event',       ['null', 'string'])
-                ->setAllowedTypes('parent',      ['null', 'string'])
+                ->setAllowedTypes('entity', 'string')
+                ->setAllowedTypes('repository', ['null', 'string'])
+                ->setAllowedTypes('operator', 'string')
+                ->setAllowedTypes('controller', 'string')
+                ->setAllowedTypes('templates', ['null', 'string', 'array'])
+                ->setAllowedTypes('form', ['null', 'string'])
+                ->setAllowedTypes('table', ['null', 'string'])
+                ->setAllowedTypes('event', ['null', 'string'])
+                ->setAllowedTypes('parent', ['null', 'string'])
                 ->setAllowedTypes('translation', ['null', 'array'])
-
-                ->setAllowedValues('entity',     $classExists)
-                ->setAllowedValues('operator',   $validOperator)
+                ->setAllowedValues('entity', $classExists)
+                ->setAllowedValues('operator', $validOperator)
                 ->setAllowedValues('controller', $validController)
-                ->setAllowedValues('form',       $validForm)
-                ->setAllowedValues('table',      $validTable)
-                ->setAllowedValues('event',      $validEvent)
-
-                ->setNormalizer('repository', function(Options $options, $value) use ($classExistsAndImplements) {
+                ->setAllowedValues('form', $validForm)
+                ->setAllowedValues('table', $validTable)
+                ->setAllowedValues('event', $validEvent)
+                ->setNormalizer('repository', function (Options $options, $value) use ($classExistsAndImplements) {
                     $translatable = is_array($options['translation']);
                     $interface = $translatable ? self::TRANSLATABLE_REPOSITORY_INTERFACE : self::REPOSITORY_INTERFACE;
                     if (null === $value) {
@@ -232,6 +236,7 @@ class ConfigurationBuilder
                         }
                     }
                     $classExistsAndImplements($value, $interface);
+
                     return $value;
                 })
                 ->setNormalizer('translation', function (Options $options, $value) use ($classExistsAndImplements) {
@@ -250,11 +255,12 @@ class ConfigurationBuilder
                         }
                         $classExistsAndImplements($value['repository'], self::REPOSITORY_INTERFACE);
                     }
+
                     return $value;
-                })
-                // TODO templates normalization ?
+                })// TODO templates normalization ?
             ;
         }
+
         return self::$optionsResolver;
     }
 
@@ -269,7 +275,7 @@ class ConfigurationBuilder
         }
 
         $this->configureInheritanceMapping(
-            $this->namespace.'.'.$this->resourceId,
+            $this->namespace . '.' . $this->resourceId,
             $this->options['entity'],
             $this->options['repository']
         );
@@ -282,17 +288,27 @@ class ConfigurationBuilder
     {
         $id = $this->getServiceId('configuration');
         if (!$this->container->has($id)) {
+
+            $translation = null;
+            if (is_array($this->options['translation'])) {
+                $translation = [
+                    'entity' => $this->options['translation']['entity'],
+                    'fields' => $this->options['translation']['fields'],
+                ];
+            }
+
             $config = [
-                'namespace' => $this->namespace,
-                'id'        => $this->resourceId,
-                'name'      => Inflector::camelize($this->resourceId),
-                'parent_id' => $this->options['parent'],
-                'classes'   => [
+                'namespace'   => $this->namespace,
+                'id'          => $this->resourceId,
+                'name'        => Inflector::camelize($this->resourceId),
+                'parent_id'   => $this->options['parent'],
+                'classes'     => [
                     'resource'  => $this->options['entity'],
                     'form_type' => $this->getServiceClass('form'), // TODO
                     'event'     => $this->options['event'], // TODO remove
                 ],
-                'templates' => $this->options['templates'],
+                'templates'   => $this->options['templates'],
+                'translation' => $translation,
             ];
 
             $definition = new DI\Definition(self::CONFIGURATION);
@@ -300,9 +316,9 @@ class ConfigurationBuilder
                 ->setFactory([new DI\Reference('ekyna_resource.configuration_factory'), 'createConfiguration'])
                 ->setArguments([$config])
                 ->addTag('ekyna_resource.configuration', [
-                    'alias' => sprintf('%s_%s', $this->namespace, $this->resourceId)]
-                )
-            ;
+                        'alias' => sprintf('%s_%s', $this->namespace, $this->resourceId)]
+                );
+
             $this->container->setDefinition($id, $definition);
         }
     }
@@ -311,6 +327,7 @@ class ConfigurationBuilder
      * Builds the templates list.
      *
      * @param mixed $templatesConfig
+     *
      * @return array
      */
     /*private function buildTemplateList($templatesConfig)
@@ -344,9 +361,10 @@ class ConfigurationBuilder
             $definition
                 ->setFactory([new DI\Reference($this->getManagerServiceId()), 'getClassMetadata'])
                 ->setArguments([
-                    $this->container->getParameter($this->getServiceId('class'))
-                ])//->setPublic(false)
-            ;
+                    $this->container->getParameter($this->getServiceId('class')),
+                ]);
+            //->setPublic(false)
+
             $this->container->setDefinition($id, $definition);
         }
     }
@@ -372,13 +390,16 @@ class ConfigurationBuilder
             $definition = new DI\Definition($class = $this->getServiceClass('repository'));
             $definition->setArguments([
                 new DI\Reference($this->getServiceId('manager')),
-                new DI\Reference($this->getServiceId('metadata'))
+                new DI\Reference($this->getServiceId('metadata')),
             ]);
             if (is_array($this->options['translation'])) {
                 $definition
-                    ->addMethodCall('setLocaleProvider', [new DI\Reference('ekyna_core.locale_provider.request')]) // TODO alias / configurable ?
-                    ->addMethodCall('setTranslatableFields', [$this->options['translation']['fields']])
-                ;
+                    ->addMethodCall('setLocaleProvider', [
+                        new DI\Reference('ekyna_core.locale_provider.request') // TODO alias / configurable ?
+                    ])
+                    ->addMethodCall('setTranslatableFields', [
+                        $this->options['translation']['fields'],
+                    ]);
             }
             $this->container->setDefinition($id, $definition);
         }
@@ -398,8 +419,9 @@ class ConfigurationBuilder
                 new DI\Reference($this->getManagerServiceId()),
                 new DI\Reference($this->getEventDispatcherServiceId()),
                 new DI\Reference($this->getServiceId('configuration')),
-                $this->container->getParameter('kernel.debug')
+                $this->container->getParameter('kernel.debug'),
             ]);
+
             $this->container->setDefinition($id, $definition);
         }
     }
@@ -414,8 +436,8 @@ class ConfigurationBuilder
             $definition = new DI\Definition($this->getServiceClass('controller'));
             $definition
                 ->addMethodCall('setConfiguration', [new DI\Reference($this->getServiceId('configuration'))])
-                ->addMethodCall('setContainer', [new DI\Reference('service_container')])
-            ;
+                ->addMethodCall('setContainer', [new DI\Reference('service_container')]);
+
             $this->container->setDefinition($id, $definition);
         }
     }
@@ -434,8 +456,8 @@ class ConfigurationBuilder
             $definition = new DI\Definition($this->getServiceClass('form'));
             $definition
                 ->setArguments([$this->options['entity']])
-                ->addTag('form.type')
-            ;
+                ->addTag('form.type');
+
             $this->container->setDefinition($id, $definition);
         }
     }
@@ -455,9 +477,9 @@ class ConfigurationBuilder
             $definition
                 ->setArguments([$this->options['entity']])
                 ->addTag('table.type', [
-                    'alias' => sprintf('%s_%s', $this->namespace, $this->resourceId)]
-                )
-            ;
+                    'alias' => sprintf('%s_%s', $this->namespace, $this->resourceId),
+                ]);
+
             $this->container->setDefinition($id, $definition);
         }
     }
@@ -484,8 +506,8 @@ class ConfigurationBuilder
             $this->container->setParameter('ekyna_resource.translation_mapping', $mapping);
 
             // Translation class parameter
-            if (!$this->container->hasParameter($id.'.class')) {
-                $this->container->setParameter($id.'.class', $translation);
+            if (!$this->container->hasParameter($id . '.class')) {
+                $this->container->setParameter($id . '.class', $translation);
             }
 
             // Inheritance mapping
@@ -512,6 +534,7 @@ class ConfigurationBuilder
         if ($this->container->hasParameter('ekyna_core.entities')) {
             $entities = array_merge($this->container->getParameter('ekyna_core.entities'), $entities);
         }
+
         $this->container->setParameter('ekyna_core.entities', $entities);
     }
 
@@ -559,7 +582,8 @@ class ConfigurationBuilder
     private function getServiceClass($name)
     {
         $serviceId = $this->getServiceId($name);
-        $parameterId = $serviceId.'.class';
+
+        $parameterId = $serviceId . '.class';
         if ($this->container->hasParameter($parameterId)) {
             $class = $this->container->getParameter($parameterId);
         } elseif (array_key_exists($name, $this->options)) {
@@ -567,6 +591,7 @@ class ConfigurationBuilder
         } else {
             throw new \RuntimeException(sprintf('Undefined "%s" service class.', $name));
         }
+
         return $class;
     }
 }

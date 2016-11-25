@@ -1,0 +1,10 @@
+config:
+    packages:
+        -
+            name: 'ekyna-resource'
+            location: 'bundles/ekynaresource/js'
+            main: 'resource'
+
+build:
+    include:
+        - 'ekyna-resource'
