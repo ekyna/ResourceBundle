@@ -7,7 +7,7 @@ define(['jquery', 'select2'], function($) {
     $.fn.resourceSearchEntity = function(config) {
 
         config = $.extend({
-            limit: 8
+            limit: 10
         }, config);
 
         this.each(function() {
