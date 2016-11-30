@@ -2,6 +2,7 @@
 
 namespace Ekyna\Bundle\ResourceBundle;
 
+use Ekyna\Bundle\ResourceBundle\DependencyInjection\Compiler\FosElasticaPass;
 use Ekyna\Bundle\ResourceBundle\DependencyInjection\Compiler\ResourceRegistryPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\EventDispatcher\DependencyInjection\RegisterListenersPass;
@@ -28,5 +29,6 @@ class EkynaResourceBundle extends Bundle
         ));
 
         $container->addCompilerPass(new ResourceRegistryPass());
+        $container->addCompilerPass(new FosElasticaPass());
     }
 }
