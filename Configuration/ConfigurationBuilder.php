@@ -386,23 +386,51 @@ class ConfigurationBuilder
     private function createRepositoryDefinition()
     {
         $id = $this->getServiceId('repository');
-        if (!$this->container->has($id)) {
-            $definition = new DI\Definition($class = $this->getServiceClass('repository'));
-            $definition->setArguments([
-                new DI\Reference($this->getServiceId('manager')),
-                new DI\Reference($this->getServiceId('metadata')),
-            ]);
+        $class = $this->getServiceClass('repository');
+
+        // If definition exists
+        if ($this->container->has($id)) {
+            $definition = $this->container->getDefinition($id);
+            // Change class if overridden
+            if ($definition->getClass() != $class) {
+                $definition->setClass($class);
+            }
+            // Add method class if not sets.
             if (is_array($this->options['translation'])) {
-                $definition
-                    ->addMethodCall('setLocaleProvider', [
+                if (!$definition->hasMethodCall('setLocaleProvider')) {
+                    $definition->addMethodCall('setLocaleProvider', [
                         new DI\Reference('ekyna_core.locale_provider.request') // TODO alias / configurable ?
-                    ])
-                    ->addMethodCall('setTranslatableFields', [
+                    ]);
+                }
+                if (!$definition->hasMethodCall('setTranslatableFields')) {
+                    $definition->addMethodCall('setTranslatableFields', [
                         $this->options['translation']['fields'],
                     ]);
+                }
             }
-            $this->container->setDefinition($id, $definition);
+
+            return;
         }
+
+        // Definition not found: create it.
+
+        $definition = new DI\Definition($class = $this->getServiceClass('repository'));
+        $definition->setArguments([
+            new DI\Reference($this->getServiceId('manager')),
+            new DI\Reference($this->getServiceId('metadata')),
+        ]);
+
+        // TODO if repository class implements translatable
+        if (is_array($this->options['translation'])) {
+            $definition
+                ->addMethodCall('setLocaleProvider', [
+                    new DI\Reference('ekyna_core.locale_provider.request') // TODO alias / configurable ?
+                ])
+                ->addMethodCall('setTranslatableFields', [
+                    $this->options['translation']['fields'],
+                ]);
+        }
+        $this->container->setDefinition($id, $definition);
     }
 
     /**
