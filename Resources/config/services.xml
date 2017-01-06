@@ -59,14 +59,16 @@
 
         <!-- Doctrine ORM entity listener -->
         <service id="ekyna_resource.doctrine.orm.entity_listener"
-                 class="Ekyna\Component\Resource\Doctrine\ORM\Listener\EntityListener">
+                 class="Ekyna\Component\Resource\Doctrine\ORM\Listener\EntityListener"
+                 public="false">
             <argument type="service" id="ekyna_resource.doctrine.orm.persistence_event_queue"/>
             <tag name="doctrine.event_subscriber"/>
         </service>
 
         <!-- Doctrine ORM translatable listener -->
         <service id="ekyna_resource.doctrine.orm.translatable_listener"
-                 class="Ekyna\Component\Resource\Doctrine\ORM\Listener\TranslatableListener">
+                 class="Ekyna\Component\Resource\Doctrine\ORM\Listener\TranslatableListener"
+                 public="false">
             <argument type="service" id="ekyna_resource.configuration_registry"/>
             <argument type="service" id="ekyna_core.locale_provider.request" />
             <argument>%ekyna_resource.translation_mapping%</argument>
