@@ -5,10 +5,13 @@ namespace Ekyna\Bundle\ResourceBundle\Model;
 /**
  * Interface ConstantsInterface
  * @package Ekyna\Bundle\CoreBundle\Model
- * @author Étienne Dauvergne <contact@ekyna.com>
+ * @author  Étienne Dauvergne <contact@ekyna.com>
  */
 interface ConstantsInterface
 {
+    const FILTER_EXCLUDE  = 0;
+    const FILTER_RESTRICT = 1;
+
     /**
      * Returns the constants configuration.
      *
@@ -36,9 +39,12 @@ interface ConstantsInterface
     /**
      * Returns the constant choices.
      *
+     * @param array $filter The values to filter.
+     * @param int   $mode   The filter mode (0: restrict, 1: exclude).
+     *
      * @return array
      */
-    public static function getChoices();
+    public static function getChoices(array $filter = [], $mode = 0);
 
     /**
      * Returns the default constant choice.

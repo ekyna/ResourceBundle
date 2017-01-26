@@ -20,13 +20,32 @@ abstract class AbstractConstants implements ConstantsInterface
     /**
      * @inheritdoc
      */
-    public static function getChoices(array $filter = [])
+    public static function getChoices(array $filter = [], $mode = 0)
     {
+        if (0 !== $mode && 1 !== $mode) {
+            throw new \InvalidArgumentException('Invalid filter mode');
+        }
+
+        if (!empty($filter)) {
+            foreach ($filter as $value) {
+                static::isValid($value, true);
+            }
+        }
+
         $choices = [];
         foreach (static::getConfig() as $constant => $config) {
-            if (empty($filter) || !in_array($constant, $filter)) {
-                $choices[$config[0]] = $constant;
+            if (!empty($filter)) {
+                // Exclusion
+                if ($mode === 0 && in_array($constant, $filter, true)) {
+                    continue;
+                }
+                // Restriction
+                if ($mode === 1 && !in_array($constant, $filter, true)) {
+                    continue;
+                }
             }
+
+            $choices[$config[0]] = $constant;
         }
 
         return $choices;
