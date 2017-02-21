@@ -22,12 +22,20 @@
             <argument type="collection" /><!-- "ekyna_resource.configuration" tagged service -->
         </service>
 
+        <!-- Locale provider -->
+        <service id="ekyna_resource.locale.request_provider"
+                 class="Ekyna\Component\Resource\Bridge\Symfony\Locale\RequestLocaleProvider">
+            <argument>%locale%</argument>
+            <argument>%locales%</argument>
+            <tag name="kernel.event_subscriber" priority="98" />
+        </service>
+
         <!-- Resource event queue -->
         <service id="ekyna_resource.event_queue"
                  class="Ekyna\Component\Resource\Event\EventQueue"
                  public="false">
             <argument type="service" id="ekyna_resource.configuration_registry"/>
-            <argument type="service" id="ekyna_resource.event_dispatcher"/>
+            <argument type="service" id="ekyna_resource.event_dispatcher"/> <!-- TODO Fix DI CR -->
         </service>
 
         <!-- Resource event dispatcher -->
@@ -37,7 +45,7 @@
             <call method="setConfigurationRegistry">
                 <argument type="service" id="ekyna_resource.configuration_registry"/>
             </call>
-            <call method="setEventQueue">
+            <call method="setEventQueue"> <!-- TODO Fix DI CR -->
                 <argument type="service" id="ekyna_resource.event_queue"/>
             </call>
         </service>
@@ -57,8 +65,17 @@
             <argument type="service" id="ekyna_resource.doctrine.orm.persistence_event_queue"/>
         </service>
 
+        <!-- Doctrine ORM load metadata subscriber -->
+        <service id="ekyna_resource.doctrine.orm.listener.load_metadata_listener"
+                 class="Ekyna\Component\Resource\Doctrine\ORM\Listener\LoadMetadataListener"
+                 public="false">
+            <argument>%ekyna_resource.entities%</argument>
+            <argument>%ekyna_resource.interfaces%</argument>
+            <tag name="doctrine.event_subscriber" />
+        </service>
+
         <!-- Doctrine ORM entity listener -->
-        <service id="ekyna_resource.doctrine.orm.entity_listener"
+        <service id="ekyna_resource.doctrine.orm.listener.entity_listener"
                  class="Ekyna\Component\Resource\Doctrine\ORM\Listener\EntityListener"
                  public="false">
             <argument type="service" id="ekyna_resource.doctrine.orm.persistence_event_queue"/>
@@ -66,11 +83,11 @@
         </service>
 
         <!-- Doctrine ORM translatable listener -->
-        <service id="ekyna_resource.doctrine.orm.translatable_listener"
+        <service id="ekyna_resource.doctrine.orm.listener.translatable_listener"
                  class="Ekyna\Component\Resource\Doctrine\ORM\Listener\TranslatableListener"
                  public="false">
             <argument type="service" id="ekyna_resource.configuration_registry"/>
-            <argument type="service" id="ekyna_core.locale_provider.request" />
+            <argument type="service" id="ekyna_resource.locale.request_provider" />
             <argument>%ekyna_resource.translation_mapping%</argument>
             <tag name="doctrine.event_subscriber" connection="default" priority="99" />
             <tag name="doctrine.orm.entity_listener"/>

@@ -60,7 +60,11 @@ class ResourceSearchType extends AbstractType
         $view->vars['attr']['data-search'] = $this->urlGenerator->generate($route, $parameters);
 
         // Select2 search Options
-        $view->vars['attr']['data-clear'] = intval($options['allow_clear']);
+        $allowClear = $options['required'] ? 0 : 1;
+        if (null !== $options['allow_clear']) {
+            $allowClear = $options['allow_clear'] ? 1 : 0;
+        }
+        $view->vars['attr']['data-allow-clear'] = $allowClear;
         $view->vars['attr']['data-format'] = $options['format_function']
             ?: "if(!data.id)return 'Rechercher'; return $('<span>'+data.choice_label+'</span>');";
 
@@ -84,12 +88,17 @@ class ResourceSearchType extends AbstractType
                 'search_route'        => null,
                 'search_route_params' => null,
                 'format_function'     => null,
-                'allow_clear'         => false,
+                'allow_clear'         => null,
+                'select2'             => false,
+                'choice_attr' => function($val, $key, $index) {
+                    // adds a class like attending_yes, attending_no, etc
+                    return ['class' => 'attending_'.strtolower($key)];
+                },
             ])
             ->setAllowedTypes('search_route', ['null', 'string'])
             ->setAllowedTypes('search_route_params', ['null', 'array'])
             ->setAllowedTypes('format_function', ['null', 'string'])
-            ->setAllowedTypes('allow_clear', 'bool');
+            ->setAllowedTypes('allow_clear', ['null', 'bool']);
     }
 
     /**

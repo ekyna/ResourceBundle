@@ -2,8 +2,7 @@
 
 namespace Ekyna\Bundle\ResourceBundle\Elastica;
 
-use Ekyna\Bundle\CoreBundle\Locale\LocaleProviderAwareInterface;
-use Ekyna\Bundle\CoreBundle\Locale\LocaleProviderAwareTrait;
+use Ekyna\Component\Resource\Locale;
 use FOS\ElasticaBundle\Doctrine\RepositoryManager as BaseManager;
 
 /**
@@ -11,9 +10,9 @@ use FOS\ElasticaBundle\Doctrine\RepositoryManager as BaseManager;
  * @package Ekyna\Bundle\ResourceBundle\Elastica
  * @author  Etienne Dauvergne <contact@ekyna.com>
  */
-class RepositoryManager extends BaseManager implements LocaleProviderAwareInterface
+class RepositoryManager extends BaseManager implements Locale\LocaleProviderAwareInterface
 {
-    use LocaleProviderAwareTrait;
+    use Locale\LocaleProviderAwareTrait;
 
     /**
      * Return repository for entity.
@@ -26,7 +25,7 @@ class RepositoryManager extends BaseManager implements LocaleProviderAwareInterf
     {
         $repository = parent::getRepository($entityName);
 
-        if ($repository instanceof LocaleProviderAwareInterface) {
+        if ($repository instanceof Locale\LocaleProviderAwareInterface) {
             $repository->setLocaleProvider($this->getLocaleProvider());
         }
 

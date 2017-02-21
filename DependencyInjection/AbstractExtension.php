@@ -20,6 +20,7 @@ abstract class AbstractExtension extends Extension
         'services',
     ];
 
+
     /**
      * {@inheritDoc}
      */

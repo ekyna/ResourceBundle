@@ -17,7 +17,7 @@ define(['jquery', 'select2'], function($) {
 
             $this.select2({
                 placeholder: 'Rechercher ...',
-                allowClear: $this.data('clear') == 1,
+                // allowClear: clear,
                 minimumInputLength: 3,
                 templateResult: formatter,
                 //templateSelection: formatter,

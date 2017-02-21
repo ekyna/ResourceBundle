@@ -2,11 +2,11 @@
 
 namespace Ekyna\Bundle\ResourceBundle\DependencyInjection;
 
-use Ekyna\Bundle\CoreBundle\DependencyInjection\Extension;
 use Ekyna\Bundle\ResourceBundle\Configuration\ConfigurationBuilder;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader;
+use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 
 /**
  * Class EkynaResourceExtension
@@ -28,6 +28,28 @@ class EkynaResourceExtension extends Extension
 
         $this->configureResources($config['resources'], $container);
 
+        /* Inheritance mapping = [
+         *     resource_id => [
+         *         'class' => Class,
+         *         'repository' => Repository class,
+         *     ]
+         * ] */
+        if (!$container->hasParameter('ekyna_resource.entities')) {
+            $container->setParameter('ekyna_resource.entities', []);
+        }
+
+        /* Target entities resolution
+         * [ Interface => Class or class parameter ]
+         */
+        if (!$container->hasParameter('ekyna_resource.interfaces')) {
+            $container->setParameter('ekyna_resource.interfaces', []);
+        }
+
+        /* Translation mapping = [
+         *     Translatable class => Translation class,
+         *     Translation class  => Translatable class,
+         * ]
+         */
         if (!$container->hasParameter('ekyna_resource.translation_mapping')) {
             $container->setParameter('ekyna_resource.translation_mapping', []);
         }

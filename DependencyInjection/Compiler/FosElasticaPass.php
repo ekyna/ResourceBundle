@@ -10,13 +10,13 @@ use Symfony\Component\DependencyInjection\Reference;
 /**
  * Class FosElasticaPass
  * @package Ekyna\Bundle\ResourceBundle\DependencyInjection\Compiler
- * @author Étienne Dauvergne <contact@ekyna.com>
+ * @author  Étienne Dauvergne <contact@ekyna.com>
  */
 class FosElasticaPass implements CompilerPassInterface
 {
     // TODO support other drivers than ORM
     const FOS_ELASTICA_MANAGER_ORM = 'fos_elastica.manager.orm';
-    const CORE_LOCALE_PROVIDER     = 'ekyna_core.locale_provider.request';
+    const RESOURCE_LOCALE_PROVIDER = 'ekyna_resource.locale.request_provider';
 
     /**
      * {@inheritdoc}
@@ -28,7 +28,7 @@ class FosElasticaPass implements CompilerPassInterface
             $managerDefinition->setClass(RepositoryManager::class);
             $managerDefinition->addMethodCall(
                 'setLocaleProvider',
-                [new Reference(self::CORE_LOCALE_PROVIDER)]
+                [new Reference(self::RESOURCE_LOCALE_PROVIDER)]
             );
         }
     }

@@ -142,126 +142,128 @@ class ConfigurationBuilder
      */
     private function getOptionsResolver()
     {
-        if (null === self::$optionsResolver) {
-            $classExists = function ($class) {
-                if (!class_exists($class)) {
-                    throw new InvalidOptionsException(sprintf('Class %s does not exists.', $class));
-                }
-
-                return true;
-            };
-            $classExistsAndImplements = function ($class, $interface) use ($classExists) {
-                $classExists($class);
-                if (!in_array($interface, class_implements($class))) {
-                    throw new InvalidOptionsException(sprintf('Class %s must implement %s.', $class, $interface));
-                }
-
-                return true;
-            };
-            $validOperator = function ($class) use ($classExistsAndImplements) {
-                if (null === $class) {
-                    return true;
-                }
-
-                return $classExistsAndImplements($class, self::OPERATOR_INTERFACE);
-            };
-            $validController = function ($class) use ($classExistsAndImplements) {
-                if (null === $class) {
-                    return true;
-                }
-
-                return $classExistsAndImplements($class, self::CONTROLLER_INTERFACE);
-            };
-            $validForm = function ($class) use ($classExistsAndImplements) {
-                if (null === $class) {
-                    return true;
-                }
-
-                return $classExistsAndImplements($class, self::FORM_INTERFACE);
-            };
-            $validTable = function ($class) use ($classExistsAndImplements) {
-                if (null === $class) {
-                    return true;
-                }
-
-                return $classExistsAndImplements($class, self::TABLE_INTERFACE);
-            };
-            $validEvent = function ($class) use ($classExistsAndImplements) {
-                if (null === $class) {
-                    return true;
-                }
-
-                return $classExistsAndImplements($class, self::EVENT_INTERFACE);
-            };
-
-            self::$optionsResolver = new OptionsResolver();
-            /** @noinspection PhpUnusedParameterInspection */
-            self::$optionsResolver
-                ->setDefaults([
-                    'entity'      => null,
-                    'repository'  => null,
-                    'operator'    => self::DEFAULT_OPERATOR,
-                    'controller'  => self::DEFAULT_CONTROLLER,
-                    'templates'   => null,
-                    'form'        => null,
-                    'table'       => null,
-                    'event'       => null,
-                    'parent'      => null,
-                    'translation' => null,
-                ])
-                ->setAllowedTypes('entity', 'string')
-                ->setAllowedTypes('repository', ['null', 'string'])
-                ->setAllowedTypes('operator', 'string')
-                ->setAllowedTypes('controller', 'string')
-                ->setAllowedTypes('templates', ['null', 'string', 'array'])
-                ->setAllowedTypes('form', ['null', 'string'])
-                ->setAllowedTypes('table', ['null', 'string'])
-                ->setAllowedTypes('event', ['null', 'string'])
-                ->setAllowedTypes('parent', ['null', 'string'])
-                ->setAllowedTypes('translation', ['null', 'array'])
-                ->setAllowedValues('entity', $classExists)
-                ->setAllowedValues('operator', $validOperator)
-                ->setAllowedValues('controller', $validController)
-                ->setAllowedValues('form', $validForm)
-                ->setAllowedValues('table', $validTable)
-                ->setAllowedValues('event', $validEvent)
-                ->setNormalizer('repository', function (Options $options, $value) use ($classExistsAndImplements) {
-                    $translatable = is_array($options['translation']);
-                    $interface = $translatable ? self::TRANSLATABLE_REPOSITORY_INTERFACE : self::REPOSITORY_INTERFACE;
-                    if (null === $value) {
-                        if ($translatable) {
-                            $value = self::TRANSLATABLE_DEFAULT_REPOSITORY;
-                        } else {
-                            $value = self::DEFAULT_REPOSITORY;
-                        }
-                    }
-                    $classExistsAndImplements($value, $interface);
-
-                    return $value;
-                })
-                ->setNormalizer('translation', function (Options $options, $value) use ($classExistsAndImplements) {
-                    if (is_array($value)) {
-                        if (!array_key_exists('entity', $value)) {
-                            throw new InvalidOptionsException('translation.entity must be defined.');
-                        }
-                        if (!array_key_exists('fields', $value)) {
-                            throw new InvalidOptionsException('translation.fields must be defined.');
-                        }
-                        if (!is_array($value['fields']) || empty($value['fields'])) {
-                            throw new InvalidOptionsException('translation.fields can\'t be empty.');
-                        }
-                        if (!array_key_exists('repository', $value)) {
-                            $value['repository'] = self::DEFAULT_REPOSITORY;
-                        }
-                        $classExistsAndImplements($value['repository'], self::REPOSITORY_INTERFACE);
-                    }
-
-                    return $value;
-                })// TODO templates normalization ?
-            ;
+        if (null !== self::$optionsResolver) {
+            return self::$optionsResolver;
         }
 
-        return self::$optionsResolver;
+        $classExists = function ($class) {
+            if (!class_exists($class)) {
+                throw new InvalidOptionsException(sprintf('Class %s does not exists.', $class));
+            }
+
+            return true;
+        };
+        $classExistsAndImplements = function ($class, $interface) use ($classExists) {
+            $classExists($class);
+            if (!in_array($interface, class_implements($class))) {
+                throw new InvalidOptionsException(sprintf('Class %s must implement %s.', $class, $interface));
+            }
+
+            return true;
+        };
+        $validOperator = function ($class) use ($classExistsAndImplements) {
+            if (null === $class) {
+                return true;
+            }
+
+            return $classExistsAndImplements($class, self::OPERATOR_INTERFACE);
+        };
+        $validController = function ($class) use ($classExistsAndImplements) {
+            if (null === $class) {
+                return true;
+            }
+
+            return $classExistsAndImplements($class, self::CONTROLLER_INTERFACE);
+        };
+        $validForm = function ($class) use ($classExistsAndImplements) {
+            if (null === $class) {
+                return true;
+            }
+
+            return $classExistsAndImplements($class, self::FORM_INTERFACE);
+        };
+        $validTable = function ($class) use ($classExistsAndImplements) {
+            if (null === $class) {
+                return true;
+            }
+
+            return $classExistsAndImplements($class, self::TABLE_INTERFACE);
+        };
+        $validEvent = function ($class) use ($classExistsAndImplements) {
+            if (null === $class) {
+                return true;
+            }
+
+            return $classExistsAndImplements($class, self::EVENT_INTERFACE);
+        };
+
+        $resolver = new OptionsResolver();
+        /** @noinspection PhpUnusedParameterInspection */
+        $resolver
+            ->setDefaults([
+                'entity'      => null,
+                'repository'  => null,
+                'operator'    => self::DEFAULT_OPERATOR,
+                'controller'  => self::DEFAULT_CONTROLLER,
+                'templates'   => null,
+                'form'        => null,
+                'table'       => null,
+                'event'       => null,
+                'parent'      => null,
+                'translation' => null,
+            ])
+            ->setAllowedTypes('entity', 'string')
+            ->setAllowedTypes('repository', ['null', 'string'])
+            ->setAllowedTypes('operator', 'string')
+            ->setAllowedTypes('controller', 'string')
+            ->setAllowedTypes('templates', ['null', 'string', 'array'])
+            ->setAllowedTypes('form', ['null', 'string'])
+            ->setAllowedTypes('table', ['null', 'string'])
+            ->setAllowedTypes('event', ['null', 'string'])
+            ->setAllowedTypes('parent', ['null', 'string'])
+            ->setAllowedTypes('translation', ['null', 'array'])
+            ->setAllowedValues('entity', $classExists)
+            ->setAllowedValues('operator', $validOperator)
+            ->setAllowedValues('controller', $validController)
+            ->setAllowedValues('form', $validForm)
+            ->setAllowedValues('table', $validTable)
+            ->setAllowedValues('event', $validEvent)
+            ->setNormalizer('repository', function (Options $options, $value) use ($classExistsAndImplements) {
+                $translatable = is_array($options['translation']);
+                $interface = $translatable ? self::TRANSLATABLE_REPOSITORY_INTERFACE : self::REPOSITORY_INTERFACE;
+                if (null === $value) {
+                    if ($translatable) {
+                        $value = self::TRANSLATABLE_DEFAULT_REPOSITORY;
+                    } else {
+                        $value = self::DEFAULT_REPOSITORY;
+                    }
+                }
+                $classExistsAndImplements($value, $interface);
+
+                return $value;
+            })
+            ->setNormalizer('translation', function (Options $options, $value) use ($classExistsAndImplements) {
+                if (is_array($value)) {
+                    if (!array_key_exists('entity', $value)) {
+                        throw new InvalidOptionsException('translation.entity must be defined.');
+                    }
+                    if (!array_key_exists('fields', $value)) {
+                        throw new InvalidOptionsException('translation.fields must be defined.');
+                    }
+                    if (!is_array($value['fields']) || empty($value['fields'])) {
+                        throw new InvalidOptionsException('translation.fields can\'t be empty.');
+                    }
+                    if (!array_key_exists('repository', $value)) {
+                        $value['repository'] = self::DEFAULT_REPOSITORY;
+                    }
+                    $classExistsAndImplements($value['repository'], self::REPOSITORY_INTERFACE);
+                }
+
+                return $value;
+            })// TODO templates normalization ?
+        ;
+
+        return self::$optionsResolver = $resolver;
     }
 
     /**
@@ -303,7 +305,7 @@ class ConfigurationBuilder
                 'name'        => Inflector::camelize($this->resourceId),
                 'parent_id'   => $this->options['parent'],
                 'classes'     => [
-                    'resource'  => $this->options['entity'],
+                    'entity'    => $this->options['entity'],
                     'form_type' => $this->getServiceClass('form'), // TODO
                     'event'     => $this->options['event'], // TODO remove
                 ],
@@ -399,7 +401,7 @@ class ConfigurationBuilder
             if (is_array($this->options['translation'])) {
                 if (!$definition->hasMethodCall('setLocaleProvider')) {
                     $definition->addMethodCall('setLocaleProvider', [
-                        new DI\Reference('ekyna_core.locale_provider.request') // TODO alias / configurable ?
+                        new DI\Reference('ekyna_resource.locale.request_provider') // TODO alias / configurable ?
                     ]);
                 }
                 if (!$definition->hasMethodCall('setTranslatableFields')) {
@@ -424,7 +426,7 @@ class ConfigurationBuilder
         if (is_array($this->options['translation'])) {
             $definition
                 ->addMethodCall('setLocaleProvider', [
-                    new DI\Reference('ekyna_core.locale_provider.request') // TODO alias / configurable ?
+                    new DI\Reference('ekyna_resource.locale.request_provider') // TODO alias / configurable ?
                 ])
                 ->addMethodCall('setTranslatableFields', [
                     $this->options['translation']['fields'],
@@ -559,11 +561,11 @@ class ConfigurationBuilder
             ],
         ];
 
-        if ($this->container->hasParameter('ekyna_core.entities')) {
-            $entities = array_merge($this->container->getParameter('ekyna_core.entities'), $entities);
+        if ($this->container->hasParameter('ekyna_resource.entities')) {
+            $entities = array_merge($this->container->getParameter('ekyna_resource.entities'), $entities);
         }
 
-        $this->container->setParameter('ekyna_core.entities', $entities);
+        $this->container->setParameter('ekyna_resource.entities', $entities);
     }
 
     /**
