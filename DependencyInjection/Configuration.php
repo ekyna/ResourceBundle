@@ -45,15 +45,15 @@ class Configuration implements ConfigurationInterface
                 ->useAttributeAsKey('name')
                 ->prototype('array')
                     ->children()
-                        ->variableNode('templates')->end() // TODO normalization ?
                         ->scalarNode('entity')->isRequired()->cannotBeEmpty()->end()
                         ->scalarNode('controller')->end()
                         ->scalarNode('repository')->end()
                         ->scalarNode('operator')->end()
-                        ->scalarNode('event')->end()
                         ->scalarNode('form')->end()
                         ->scalarNode('table')->end()
                         ->scalarNode('parent')->end()
+                        ->variableNode('templates')->end() // TODO normalization ?
+                        ->variableNode('event')->end()
                         ->arrayNode('translation')
                             ->children()
                                 ->scalarNode('entity')->end()

@@ -50,18 +50,28 @@
             </call>
         </service>
 
+        <!-- Resource persistence tracker -->
+        <service id="ekyna_resource.doctrine.orm.persistence_tracker"
+                 class="Ekyna\Component\Resource\Doctrine\ORM\PersistenceTracker"
+                 public="false">
+            <argument type="service" id="doctrine.orm.default_entity_manager"/>
+        </service>
+
         <!-- Resource persistence event queue -->
         <service id="ekyna_resource.doctrine.orm.persistence_event_queue"
                  class="Ekyna\Component\Resource\Persistence\PersistenceEventQueue"
                  public="false">
             <argument type="service" id="ekyna_resource.configuration_registry"/>
             <argument type="service" id="ekyna_resource.event_dispatcher"/>
+            <argument type="service" id="ekyna_resource.doctrine.orm.persistence_tracker"/>
         </service>
 
         <!-- Doctrine ORM persistence helper -->
         <service id="ekyna_resource.doctrine.orm.persistence_helper"
-                 class="Ekyna\Component\Resource\Doctrine\ORM\PersistenceHelper">
+                 class="Ekyna\Component\Resource\Doctrine\ORM\PersistenceHelper"
+                 lazy="true">
             <argument type="service" id="doctrine.orm.default_entity_manager"/>
+            <argument type="service" id="ekyna_resource.doctrine.orm.persistence_tracker"/>
             <argument type="service" id="ekyna_resource.doctrine.orm.persistence_event_queue"/>
         </service>
 

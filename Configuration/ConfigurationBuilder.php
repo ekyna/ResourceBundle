@@ -124,6 +124,8 @@ class ConfigurationBuilder
         $this->createOperatorDefinition();
 
         // TODO search repository service
+        // TODO normalizer (serialization) service
+        // TODO (resource)event listener service
 
         $this->createControllerDefinition();
 
@@ -142,6 +144,7 @@ class ConfigurationBuilder
      */
     private function getOptionsResolver()
     {
+        // TODO Use/Merge ConfigurationFactory options resolver.
         if (null !== self::$optionsResolver) {
             return self::$optionsResolver;
         }
@@ -189,12 +192,16 @@ class ConfigurationBuilder
 
             return $classExistsAndImplements($class, self::TABLE_INTERFACE);
         };
-        $validEvent = function ($class) use ($classExistsAndImplements) {
-            if (null === $class) {
-                return true;
+        $validEvent = function ($value) use ($classExistsAndImplements) {
+            if (null !== $value) {
+                if (is_string($value)) {
+                    return $classExistsAndImplements($value, self::EVENT_INTERFACE);
+                } elseif (is_array($value) && isset($value['class'])) {
+                    return $classExistsAndImplements($value['class'], self::EVENT_INTERFACE);
+                }
             }
 
-            return $classExistsAndImplements($class, self::EVENT_INTERFACE);
+            return true;
         };
 
         $resolver = new OptionsResolver();
@@ -219,7 +226,7 @@ class ConfigurationBuilder
             ->setAllowedTypes('templates', ['null', 'string', 'array'])
             ->setAllowedTypes('form', ['null', 'string'])
             ->setAllowedTypes('table', ['null', 'string'])
-            ->setAllowedTypes('event', ['null', 'string'])
+            ->setAllowedTypes('event', ['null', 'string', 'array'])
             ->setAllowedTypes('parent', ['null', 'string'])
             ->setAllowedTypes('translation', ['null', 'array'])
             ->setAllowedValues('entity', $classExists)
@@ -260,7 +267,9 @@ class ConfigurationBuilder
                 }
 
                 return $value;
-            })// TODO templates normalization ?
+            })
+            // TODO event normalization ?
+            // TODO templates normalization ?
         ;
 
         return self::$optionsResolver = $resolver;
@@ -307,8 +316,8 @@ class ConfigurationBuilder
                 'classes'     => [
                     'entity'    => $this->options['entity'],
                     'form_type' => $this->getServiceClass('form'), // TODO
-                    'event'     => $this->options['event'], // TODO remove
                 ],
+                'event'       => $this->options['event'],
                 'templates'   => $this->options['templates'],
                 'translation' => $translation,
             ];
@@ -324,33 +333,6 @@ class ConfigurationBuilder
             $this->container->setDefinition($id, $definition);
         }
     }
-
-    /**
-     * Builds the templates list.
-     *
-     * @param mixed $templatesConfig
-     *
-     * @return array
-     */
-    /*private function buildTemplateList($templatesConfig)
-    {
-        $templateNamespace = self::DEFAULT_TEMPLATES;
-        if (is_string($templatesConfig)) {
-            $templateNamespace = $templatesConfig;
-        }
-        $templatesList = [];
-        foreach (self::$templates as $name => $extensions) {
-            foreach ($extensions as $extension) {
-                $file = $name.'.'.$extension;
-                $templatesList[$file] = $templateNamespace.':'.$file;
-            }
-        }
-        // TODO add resources controller traits templates ? (like new_child.html)
-        if (is_array($templatesConfig)) {
-            $templatesList = array_merge($templatesList, $templatesConfig);
-        }
-        return $templatesList;
-    }*/
 
     /**
      * Creates the Table service definition.
