@@ -1,0 +1,17 @@
+oneup_flysystem:
+    adapters:
+        local_upload:
+            local:
+                location: "%kernel.data_dir%/upload"
+        local_tmp:
+            local:
+                location: "%kernel.data_dir%/tmp"
+    filesystems:
+        local_upload:
+            adapter: local_upload
+            alias:   local_upload_filesystem
+            mount:   local_upload
+        local_tmp:
+            adapter: local_tmp
+            alias:   local_tmp_filesystem
+            mount:   local_tmp

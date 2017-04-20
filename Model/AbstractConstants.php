@@ -1,6 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Ekyna\Bundle\ResourceBundle\Model;
+
+use Ekyna\Component\Resource\Exception\InvalidArgumentException;
+use Symfony\Contracts\Translation\TranslatableInterface;
+
+use function array_key_exists;
+use function array_keys;
+use function in_array;
+use function reset;
+use function sprintf;
+use function Symfony\Component\Translation\t;
 
 /**
  * Class AbstractConstants
@@ -9,21 +21,15 @@ namespace Ekyna\Bundle\ResourceBundle\Model;
  */
 abstract class AbstractConstants implements ConstantsInterface
 {
-    /**
-     * @inheritdoc
-     */
     public static function getConstants(): array
     {
         return array_keys(static::getConfig());
     }
 
-    /**
-     * @inheritdoc
-     */
-    public static function getChoices(array $filter = [], $mode = self::FILTER_EXCLUDE)
+    public static function getChoices(array $filter = [], int $mode = self::FILTER_EXCLUDE): array
     {
         if (0 !== $mode && 1 !== $mode) {
-            throw new \InvalidArgumentException('Invalid filter mode');
+            throw new InvalidArgumentException('Invalid filter mode');
         }
 
         if (!empty($filter)) {
@@ -51,9 +57,6 @@ abstract class AbstractConstants implements ConstantsInterface
         return $choices;
     }
 
-    /**
-     * @inheritdoc
-     */
     public static function getDefaultChoice(): ?string
     {
         $constants = static::getConstants();
@@ -65,27 +68,18 @@ abstract class AbstractConstants implements ConstantsInterface
         return null;
     }
 
-    /**
-     * @inheritdoc
-     */
-    public static function getLabel(string $constant): string
+    public static function getLabel(string $constant): TranslatableInterface
     {
-        if (null === $constant) {
-            return 'ekyna_core.value.undefined';
-        }
-
         static::isValid($constant, true);
 
-        return static::getConfig()[$constant][0];
+        return t(static::getConfig()[$constant][0], [], static::getTranslationDomain());
     }
 
-    /**
-     * Returns the constant's theme.
-     *
-     * @param string $constant
-     *
-     * @return string
-     */
+    public static function getTranslationDomain(): ?string
+    {
+        return null;
+    }
+
     public static function getTheme(string $constant): ?string
     {
         static::isValid($constant, true);
@@ -95,9 +89,6 @@ abstract class AbstractConstants implements ConstantsInterface
         return $config[1] ?? null;
     }
 
-    /**
-     * @inheritdoc
-     */
     public static function isValid(string $constant, bool $throwException = false): bool
     {
         if (array_key_exists($constant, static::getConfig())) {
@@ -105,7 +96,7 @@ abstract class AbstractConstants implements ConstantsInterface
         }
 
         if ($throwException) {
-            throw new \InvalidArgumentException(sprintf('Unknown constant "%s"', $constant));
+            throw new InvalidArgumentException(sprintf('Unknown constant "%s"', $constant));
         }
 
         return false;

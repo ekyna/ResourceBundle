@@ -1,0 +1,28 @@
+extensions:
+    - Ekyna\Bundle\ResourceBundle\Service\Routing\RoutingExtension
+    - Ekyna\Component\Resource\Bridge\Symfony\Serializer\SerializerExtension
+    - Ekyna\Component\Resource\Bridge\Symfony\Elastica\SearchExtension
+    - Ekyna\Component\Resource\Doctrine\ORM\OrmExtension
+
+permissions:
+    list:
+        label: permission.list
+        trans_domain: EkynaResource
+    read:
+        label: permission.read
+        trans_domain: EkynaResource
+    create:
+        label: permission.create
+        trans_domain: EkynaResource
+    update:
+        label: permission.update
+        trans_domain: EkynaResource
+    delete:
+        label: permission.delete
+        trans_domain: EkynaResource
+    search:
+        label: permission.search
+        trans_domain: EkynaResource
+
+behaviors:
+    Ekyna\Bundle\ResourceBundle\Behavior\UploadableBehavior: ~

@@ -1,14 +1,27 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Ekyna\Bundle\ResourceBundle\Form\Type;
 
 use Ekyna\Bundle\ResourceBundle\Model\ConstantsInterface;
+use ReflectionClass;
+use ReflectionException;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints as Assert;
+
+use Symfony\Contracts\Translation\TranslatorInterface;
+
+use function array_combine;
+use function array_keys;
+use function array_map;
+use function array_values;
+use function call_user_func;
+use function is_subclass_of;
 
 /**
  * Class ConstantChoiceType
@@ -17,10 +30,14 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 class ConstantChoiceType extends AbstractType
 {
-    /**
-     * @inheritDoc
-     */
-    public function configureOptions(OptionsResolver $resolver)
+    private TranslatorInterface $translator;
+
+    public function __construct(TranslatorInterface $translator)
+    {
+        $this->translator = $translator;
+    }
+
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver
             ->setRequired('class')
@@ -44,8 +61,18 @@ class ConstantChoiceType extends AbstractType
                     $parameters[] = $options['filter_mode'];
                 }
 
-                return call_user_func([$class, $method], ...$parameters);
+                /** @see ConstantsInterface::getChoices() */
+                $choices = call_user_func([$class, $method], ...$parameters);
+
+                /** @see ConstantsInterface::getTranslationDomain() */
+                $domain = call_user_func($options['class'] . '::getTranslationDomain');
+
+                return array_combine(array_map(function(string $label) use ($domain) {
+                    return $this->translator->trans($label, [], $domain);
+                }, array_keys($choices)), array_values($choices));
             })
+            ->setDefault('choice_translation_domain', false)
+            ->setDefault('placeholder', $this->translator->trans('value.none', [], 'EkynaUi'))
             ->setDefault('constraints', function (Options $options, $value) {
                 if (!empty($value)) {
                     return $value;
@@ -63,43 +90,52 @@ class ConstantChoiceType extends AbstractType
                 ];
             })
             ->setAllowedTypes('class', 'string')
-            ->setAllowedTypes('accessor', 'string');
+            ->setAllowedTypes('accessor', 'string')
+            ->setAllowedTypes('filter', ['string', 'string[]'])
+            ->setAllowedValues('class', function($value) {
+                return is_subclass_of($value, ConstantsInterface::class);
+            })
+            ->setAllowedValues('filter_mode', [
+                ConstantsInterface::FILTER_EXCLUDE,
+                ConstantsInterface::FILTER_RESTRICT,
+            ])
+            ->setNormalizer('filter', function(Options $options, $value) {
+                if (!is_array($value)) {
+                    return (array)$value;
+                }
+
+                return $value;
+            });
     }
 
     /**
      * Validates the constant class.
      *
-     * @param string $class
-     * @param string $method
-     *
      * @throws InvalidOptionsException If the class does not exist or if it does not implement the
      *                                 {@link \Ekyna\Bundle\ResourceBundle\Model\ConstantsInterface}
      * @throws InvalidOptionsException If the method does not exist in class, or is not static
      */
-    private function validateCallback(string $class, string $method)
+    private function validateCallback(string $class, string $method): void
     {
         if (!class_exists($class)) {
-            throw new InvalidOptionsException(sprintf("The class %s does not exists.", $class));
+            throw new InvalidOptionsException(sprintf('The class %s does not exists.', $class));
         }
 
         if (!is_subclass_of($class, ConstantsInterface::class)) {
             throw new InvalidOptionsException(
-                sprintf("The class %s must implements %s", $class, ConstantsInterface::class)
+                sprintf('The class %s must implements %s', $class, ConstantsInterface::class)
             );
         }
 
-        $rc = new \ReflectionClass($class);
+        $rc = new ReflectionClass($class);
         if (!($rc->hasMethod($method) && ($rm = $rc->getMethod($method)) && $rm->isStatic())) {
             throw new InvalidOptionsException(
-                sprintf("Method %s does not exist in class %s, or is not static", $method, $class)
+                sprintf('Method %s does not exist in class %s, or is not static', $method, $class)
             );
         }
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function getParent()
+    public function getParent(): ?string
     {
         return ChoiceType::class;
     }

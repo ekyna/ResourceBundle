@@ -1,0 +1,12 @@
+_oneup_uploader:
+    resource: .
+    type: uploader
+
+ekyna_resource_local_upload_download:
+    path: /download/file/{key}
+    controller: Ekyna\Bundle\ResourceBundle\Controller\LocalUploadController::download
+    methods: [GET]
+    requirements:
+        key: '[a-z0-9-\./]+'
+    options:
+        expose: true

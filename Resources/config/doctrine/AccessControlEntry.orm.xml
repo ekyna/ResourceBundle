@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping
+        xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                        http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <entity name="Ekyna\Bundle\ResourceBundle\Entity\AccessControlEntry"
+            table="resource_ace">
+
+        <indexes>
+            <index columns="subject_id,namespace,resource,permission" name="index_resource_ace"/>
+        </indexes>
+
+        <unique-constraints>
+            <unique-constraint columns="subject_id,namespace,resource,permission" name="unique_resource_ace"/>
+        </unique-constraints>
+
+        <id name="id" type="integer" column="id">
+            <generator strategy="AUTO"/>
+        </id>
+
+        <field name="subject" type="string" column="subject_id" length="64" nullable="false"/>
+        <field name="namespace" type="string" column="namespace" length="64" nullable="false"/>
+        <field name="resource" type="string" column="resource" length="64" nullable="false"/>
+        <field name="permission" type="string" column="permission" length="32" nullable="false"/>
+        <field name="granted" type="boolean" column="granted" nullable="false"/>
+
+    </entity>
+
+</doctrine-mapping>

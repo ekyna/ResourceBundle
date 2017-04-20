@@ -1,26 +1,24 @@
 define(['jquery', 'select2'], function($) {
     "use strict";
 
+    const defaults = {
+        limit: 10,
+    };
+
     /**
      * Resource search widget
      */
     $.fn.resourceSearchEntity = function(config) {
-
         config = $.extend({
             limit: 10
         }, config);
 
         this.each(function() {
-
-            var $this = $(this),
-                formatter = new Function('data', $this.data('format'));
+            let $this = $(this)
+                config = $.extend({}, defaults, $this.data('config'));
 
             $this.select2({
-                placeholder: 'Rechercher ...',
-                // allowClear: clear,
                 minimumInputLength: 3,
-                templateResult: formatter,
-                //templateSelection: formatter,
                 ajax: {
                     delay: 300,
                     url: $this.data('search'),

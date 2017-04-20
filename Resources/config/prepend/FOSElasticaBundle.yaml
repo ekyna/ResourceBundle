@@ -1,0 +1,55 @@
+fos_elastica:
+    serializer: ~
+    clients:
+        default:
+            retryOnConflict: 2
+            logger: false
+    index_templates:
+        ekyna:
+            client: default
+            template_name: "%env(ELASTICSEARCH_NAME)%_ekyna"
+            template: "%env(ELASTICSEARCH_NAME)%_*"
+            settings:
+                number_of_shards: 1
+                number_of_replicas: 0
+                index:
+                    analysis:
+                        # TODO With Elastica 7.x, use "search-as-you-type".
+                        # https://www.elastic.co/guide/en/elasticsearch/reference/current/search-as-you-type.html
+                        tokenizer:
+                            ngram: { type: ngram, min_gram: 3, max_gram: 3, token_chars: [digit] }
+                            edge: { type: edge_ngram, min_gram: 3, max_gram: 3, token_chars: [letter, digit] }
+                        filter:
+                            email_capture: { type: pattern_capture, preserve_original: true, patterns: ["([^@]+)", "(\\p{L}+)", "(\\d+)", "@(.+)"] }
+                            email_edge: { type: edge_ngram, min_gram: 3, max_gram: 3 }
+                            en_stop: { type: stop, stopwords: [_english_], ignore_case: true }
+                            en_stemmer: { type: stemmer, language: english }
+                            en_positive_stemmer: { type: stemmer, language: possessive_english }
+                            fr_elision: { type: elision, articles_case: true, articles: [l, m, t, qu, n, s, j, d, c, jusqu, quoiqu, lorsqu, puisqu] }
+                            fr_stop: { type: stop, stopwords: [_french_], ignore_case: true }
+                            fr_stemmer: { type: stemmer, language: light_french }
+                        analyzer:
+                            default: { tokenizer: standard, filter: [icu_folding] }
+                            ngram: { tokenizer: ngram, filter: [icu_folding] }
+                            edge: { tokenizer: edge, filter: [icu_folding] }
+                            email: { tokenizer: uax_url_email, filter: [email_capture, lowercase, stop, email_edge] }
+                            en_light: { char_filter: [html_strip], tokenizer: icu_tokenizer, filter: [icu_folding] }
+                            en_heavy: { char_filter: [html_strip], tokenizer: icu_tokenizer, filter: [en_positive_stemmer, icu_folding, en_stop, en_stemmer] }
+                            fr_light: { char_filter: [html_strip], tokenizer: icu_tokenizer, filter: [fr_elision, icu_folding] }
+                            fr_heavy: { char_filter: [html_strip], tokenizer: icu_tokenizer, filter: [fr_elision, icu_folding, fr_stop, fr_stemmer] }
+                            search: { tokenizer: standard, filter: [icu_folding] }
+            properties:
+                id: { type: integer }
+                text: { type: text }
+            dynamic_templates:
+                trans_en:
+                    match_mapping_type: string
+                    path_match: "*.en.*"
+                    mapping: { type: text, analyzer: en_light, fields: { analyzed: { type: text, analyzer: en_heavy } } }
+                trans_fr:
+                    match_mapping_type: string
+                    path_match: "*.fr.*"
+                    mapping: { type: text, analyzer: fr_light, fields: { analyzed: { type: text, analyzer: fr_heavy } } }
+                default:
+                    match_mapping_type: string
+                    mapping: { type: text, analyzer: default }

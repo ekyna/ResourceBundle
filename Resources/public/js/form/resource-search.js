@@ -1,1 +1,56 @@
-define(["jquery","select2"],function(a){"use strict";return a.fn.resourceSearchEntity=function(b){return b=a.extend({limit:10},b),this.each(function(){var c=a(this),d=new Function("data",c.data("format"));c.select2({placeholder:"Rechercher ...",minimumInputLength:3,templateResult:d,ajax:{delay:300,url:c.data("search"),dataType:"json",data:function(a){return{query:a.term,page:a.page,limit:b.limit}},processResults:function(a,c){return c.page=c.page||1,{results:a.results,pagination:{more:c.page*b.limit<a.total_count}}},escapeMarkup:function(a){return a}}})}),this},{init:function(a){a.resourceSearchEntity()}}});
+define(['jquery', 'select2'], function($) {
+    "use strict";
+
+    const defaults = {
+        limit: 10,
+    };
+
+    /**
+     * Resource search widget
+     */
+    $.fn.resourceSearchEntity = function(config) {
+        config = $.extend({
+            limit: 10
+        }, config);
+
+        this.each(function() {
+            let $this = $(this)
+                config = $.extend({}, defaults, $this.data('config'));
+
+            $this.select2({
+                minimumInputLength: 3,
+                ajax: {
+                    delay: 300,
+                    url: $this.data('search'),
+                    dataType: 'json',
+                    data: function (params) {
+                        return {
+                            query: params.term,
+                            page:  params.page,
+                            limit: config.limit
+                        };
+                    },
+                    processResults: function (data, params) {
+                        params.page = params.page || 1;
+                        return {
+                            results: data.results,
+                            pagination: {
+                                more: (params.page * config.limit) < data.total_count
+                            }
+                        };
+                    },
+                    escapeMarkup: function (markup) {
+                        return markup;
+                    }
+                }
+            });
+        });
+        return this;
+    };
+
+    return {
+        init: function($element) {
+            $element.resourceSearchEntity();
+        }
+    };
+});

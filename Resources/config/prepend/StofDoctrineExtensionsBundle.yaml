@@ -1,0 +1,11 @@
+stof_doctrine_extensions:
+    default_locale: '%kernel.default_locale%'
+    orm:
+        default:
+            tree: true
+            sluggable: true
+            timestampable: true
+            sortable: true
+            translatable: false
+            softdeleteable: false
+            loggable: false

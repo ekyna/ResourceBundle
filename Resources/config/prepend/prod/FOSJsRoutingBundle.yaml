@@ -1,0 +1,6 @@
+fos_js_routing:
+    cache_control:
+        public: true
+        maxage: 604800
+        smaxage: 604800
+        expires: "7 days"

@@ -1,6 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Ekyna\Bundle\ResourceBundle\Model;
+
+use Symfony\Contracts\Translation\TranslatableInterface;
 
 /**
  * Interface ConstantsInterface
@@ -9,8 +13,8 @@ namespace Ekyna\Bundle\ResourceBundle\Model;
  */
 interface ConstantsInterface
 {
-    const FILTER_EXCLUDE  = 0;
-    const FILTER_RESTRICT = 1;
+    public const FILTER_EXCLUDE  = 0;
+    public const FILTER_RESTRICT = 1;
 
     /**
      * Returns the constants configuration.
@@ -25,14 +29,11 @@ interface ConstantsInterface
      *     self::CONSTANT_2 => array("Constant 2 label", "Constant 2 custom value"),
      * );
      * </code>
-     * @return array
      */
     public static function getConfig(): array;
 
     /**
      * Returns the constants.
-     *
-     * @return array
      */
     public static function getConstants(): array;
 
@@ -41,43 +42,31 @@ interface ConstantsInterface
      *
      * @param array $filter The values to filter.
      * @param int   $mode   The filter mode (0: exclusion, 1: restriction).
-     *
-     * @return array
      */
-    public static function getChoices(array $filter = [], int $mode = self::FILTER_EXCLUDE);
+    public static function getChoices(array $filter = [], int $mode = self::FILTER_EXCLUDE): array;
 
     /**
      * Returns the default constant choice.
-     *
-     * @return string|null
      */
     public static function getDefaultChoice(): ?string;
 
     /**
      * Returns the label for the given constant.
-     *
-     * @param string $constant
-     *
-     * @return string
      */
-    public static function getLabel(string $constant): string;
+    public static function getLabel(string $constant): TranslatableInterface;
+
+    /**
+     * Returns the translation domain for both label and choices.
+     */
+    public static function getTranslationDomain(): ?string;
 
     /**
      * Returns the theme for the given constant.
-     *
-     * @param string $constant
-     *
-     * @return string|null
      */
     public static function getTheme(string $constant): ?string;
 
     /**
      * Returns whether the constant is valid or not.
-     *
-     * @param string   $constant
-     * @param boolean $throwException
-     *
-     * @return bool
      */
     public static function isValid(string $constant, bool $throwException = false): bool;
 }

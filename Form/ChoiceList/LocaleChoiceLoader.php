@@ -1,10 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Ekyna\Bundle\ResourceBundle\Form\ChoiceList;
 
 use Symfony\Component\Form\ChoiceList\ArrayChoiceList;
+use Symfony\Component\Form\ChoiceList\ChoiceListInterface;
 use Symfony\Component\Form\ChoiceList\Loader\ChoiceLoaderInterface;
-use Symfony\Component\Intl\Intl;
+use Symfony\Component\Intl\Locales;
+
+use function array_filter;
+use function mb_convert_case;
 
 /**
  * Class LocaleChoiceLoader
@@ -13,31 +19,16 @@ use Symfony\Component\Intl\Intl;
  */
 class LocaleChoiceLoader implements ChoiceLoaderInterface
 {
-    /**
-     * @var array
-     */
-    private $locales;
-
-    /**
-     * @var ArrayChoiceList
-     */
-    private $choiceList;
+    private array            $locales;
+    private ?ArrayChoiceList $choiceList = null;
 
 
-    /**
-     * Constructor.
-     *
-     * @param array $locales
-     */
     public function __construct(array $locales)
     {
         $this->locales = $locales;
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function loadChoiceList($value = null)
+    public function loadChoiceList(callable $value = null): ChoiceListInterface
     {
         if (null !== $this->choiceList) {
             return $this->choiceList;
@@ -45,7 +36,7 @@ class LocaleChoiceLoader implements ChoiceLoaderInterface
 
         $locales = [];
         foreach ($this->locales as $locale) {
-            $name = Intl::getLocaleBundle()->getLocaleName($locale);
+            $name = Locales::getName($locale);
             $locales[mb_convert_case($name, MB_CASE_TITLE)] = $locale;
         }
 
@@ -55,7 +46,7 @@ class LocaleChoiceLoader implements ChoiceLoaderInterface
     /**
      * @inheritDoc
      */
-    public function loadChoicesForValues(array $values, $value = null)
+    public function loadChoicesForValues(array $values, $value = null): array
     {
         // Optimize
         $values = array_filter($values);
@@ -69,7 +60,7 @@ class LocaleChoiceLoader implements ChoiceLoaderInterface
     /**
      * @inheritDoc
      */
-    public function loadValuesForChoices(array $choices, $value = null)
+    public function loadValuesForChoices(array $choices, $value = null): array
     {
         // Optimize
         $choices = array_filter($choices);

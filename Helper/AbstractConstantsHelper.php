@@ -1,8 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Ekyna\Bundle\ResourceBundle\Helper;
 
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatableInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
+
+use function Symfony\Component\Translation\t;
 
 /**
  * Class AbstractConstantsHelper
@@ -11,54 +16,35 @@ use Symfony\Component\Translation\TranslatorInterface;
  */
 abstract class AbstractConstantsHelper
 {
-    /**
-     * @var TranslatorInterface
-     */
-    protected $translator;
+    protected TranslatorInterface $translator;
 
-
-    /**
-     * Constructor.
-     *
-     * @param TranslatorInterface $translator
-     */
     public function __construct(TranslatorInterface $translator)
     {
         $this->translator = $translator;
     }
 
-    /**
-     * Returns the translator.
-     *
-     * @return TranslatorInterface
-     */
-    public function getTranslator()
+    public function getTranslator(): TranslatorInterface
     {
         return $this->translator;
     }
 
     /**
-     * Renders the state label.
-     *
-     * @param string $label
-     *
-     * @return string
+     * Renders the constant label.
      */
-    protected function renderLabel($label = 'ekyna_core.value.unknown')
+    protected function renderLabel(?TranslatableInterface $label): string
     {
-        return $this->translator->trans($label);
+        if (!$label) {
+            $label = t('value.unknown', [], 'EkynaUi');
+        }
+
+        return $label->trans($this->translator);
     }
 
     /**
-     * Renders the state badge.
-     *
-     * @param string $label
-     * @param string $theme
-     *
-     * @return string
+     * Renders the constant badge.
      */
-    protected function renderBadge($label, $theme = 'default')
+    protected function renderBadge(string $label, string $theme = 'default'): string
     {
-        return sprintf('<span class="label label-%s">%s</span>', $theme, $label);
+        return sprintf('<span class="label label-%s product-type-badge">%s</span>', $theme, $label);
     }
 }

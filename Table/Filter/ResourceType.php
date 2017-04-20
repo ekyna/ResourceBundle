@@ -1,13 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Ekyna\Bundle\ResourceBundle\Table\Filter;
 
-use Ekyna\Component\Resource\Configuration\ConfigurationRegistry;
+use Ekyna\Component\Resource\Config\Registry\ResourceRegistryInterface;
 use Ekyna\Component\Table\Bridge\Doctrine\ORM\Type\Filter\EntityType;
 use Ekyna\Component\Table\Filter\AbstractFilterType;
 use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+
+use function Symfony\Component\Translation\t;
 
 /**
  * Class ResourceType
@@ -16,34 +20,23 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  */
 class ResourceType extends AbstractFilterType
 {
-    /**
-     * @var ConfigurationRegistry
-     */
-    protected $registry;
+    protected ResourceRegistryInterface $registry;
 
 
-    /**
-     * Constructor.
-     *
-     * @param ConfigurationRegistry $registry
-     */
-    public function __construct(ConfigurationRegistry $registry)
+    public function __construct(ResourceRegistryInterface $registry)
     {
         $this->registry = $registry;
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver
             ->setRequired('resource')
-            ->setDefault('class', function(Options $options, $value) {
+            ->setDefault('class', function (Options $options, $value) {
                 $class = $this
                     ->registry
-                    ->findById($options['resource'])
-                    ->getResourceClass();
+                    ->find($options['resource'])
+                    ->getEntityClass();
 
                 if ($value && $value !== $class) {
                     throw new InvalidOptionsException("Options 'resource' and 'class' miss match.");
@@ -51,22 +44,18 @@ class ResourceType extends AbstractFilterType
 
                 return $class;
             })
-            ->setDefault('label', function(Options $options, $value) {
+            ->setDefault('label', function (Options $options, $value) {
                 if ($value) {
                     return $value;
                 }
 
-                return $this
-                    ->registry
-                    ->findById($options['resource'])
-                    ->getResourceLabel();
+                $config = $this->registry->find($options['resource']);
+
+                return t($config->getResourceLabel(), [], $config->getTransDomain());
             });
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function getParent()
+    public function getParent(): ?string
     {
         return EntityType::class;
     }

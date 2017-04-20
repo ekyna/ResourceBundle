@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="robots" content="noindex,nofollow" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>{{ message }}</title>
+    <style>{# TODO #}</style>
+</head>
+<body>
+    <h1>{{ message }}</h1>
+    <p>{{ code }} | {{ status }} | {{ class }}</p>
+
+    <hr>
+
+    {% if request is not null %}
+    <p>
+        [request] {{ request.pathInfo }}
+    </p>
+    {% endif %}
+
+    {% if user is not null %}
+    <p>
+        [User] {{ user }}<br>
+    </p>
+    {% endif %}
+
+    <hr>
+
+    <pre>{{ stacks }}</pre>
+</body>
+</html>

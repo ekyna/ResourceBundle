@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Ekyna\Bundle\ResourceBundle\DependencyInjection;
 
+use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
@@ -12,63 +15,74 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
  */
 class Configuration implements ConfigurationInterface
 {
-    /**
-     * {@inheritDoc}
-     */
-    public function getConfigTreeBuilder()
+    public function getConfigTreeBuilder(): TreeBuilder
     {
-        $treeBuilder = new TreeBuilder();
-        $rootNode = $treeBuilder->root('ekyna_resource');
+        $builder = new TreeBuilder('ekyna_resource');
 
-        $rootNode
-            ->children()
-                ->append($this->getResourcesSection())
-            ->end()
-        ;
+        $root = $builder->getRootNode();
 
-        return $treeBuilder;
+        $this->addI18nNode($root);
+        $this->addPdfSection($root);
+        $this->addReportNode($root);
+
+        return $builder;
     }
 
-    /**
-     * Returns the resources configuration definition.
-     *
-     * @return \Symfony\Component\Config\Definition\Builder\NodeDefinition
-     */
-    private function getResourcesSection()
+    private function addI18nNode(ArrayNodeDefinition $builder): void
     {
-        $builder = new TreeBuilder();
-        $node = $builder->root('resources');
-
-        $node
-            ->useAttributeAsKey('prefix') // TODO rename as 'namespace'
-            ->prototype('array')
-                ->useAttributeAsKey('name')
-                ->prototype('array')
+        $builder
+            ->children()
+                ->arrayNode('i18n')
+                    ->canBeDisabled()
+                    ->addDefaultsIfNotSet()
                     ->children()
-                        ->scalarNode('entity')->isRequired()->cannotBeEmpty()->end()
-                        ->scalarNode('controller')->end()
-                        ->scalarNode('repository')->end()
-                        ->scalarNode('operator')->end()
-                        ->scalarNode('form')->end()
-                        ->scalarNode('table')->end()
-                        ->scalarNode('parent')->end()
-                        ->variableNode('templates')->end() // TODO normalization ?
-                        ->variableNode('event')->end()
-                        ->arrayNode('translation')
-                            ->children()
-                                ->scalarNode('entity')->end()
-                                ->scalarNode('repository')->end()
-                                ->arrayNode('fields')
-                                    ->prototype('scalar')->end()
-                                    ->defaultValue([])
-                                ->end()
-                            ->end()
+                        ->scalarNode('locale')
+                            ->cannotBeEmpty()
+                            ->defaultValue('en')
+                        ->end()
+                        ->arrayNode('locales')
+                            ->cannotBeEmpty()
+                            ->defaultValue(['en'])
+                            ->scalarPrototype()->end()
+                        ->end()
+                        ->arrayNode('hosts')
+                            ->defaultValue([])
+                            ->useAttributeAsKey('name')
+                            ->scalarPrototype()->end()
                         ->end()
                     ->end()
                 ->end()
-            ->end()
-        ;
+            ->end();
+    }
 
-        return $node;
+    private function addPdfSection(ArrayNodeDefinition $node): void
+    {
+        $node
+            ->children()
+                ->arrayNode('pdf')
+                    ->isRequired()
+                    ->children()
+                        ->scalarNode('entry_point')->isRequired()->cannotBeEmpty()->end()
+                        ->scalarNode('token')->isRequired()->cannotBeEmpty()->end()
+                    ->end()
+                ->end()
+            ->end();
+    }
+
+    private function addReportNode(ArrayNodeDefinition $builder): void
+    {
+        $builder
+            ->children()
+                ->arrayNode('report')
+                    ->canBeDisabled()
+                    ->addDefaultsIfNotSet()
+                    ->children()
+                        ->scalarNode('email')
+                            ->cannotBeEmpty()
+                            ->defaultValue('support@ekyan.com')
+                        ->end()
+                    ->end()
+                ->end()
+            ->end();
     }
 }

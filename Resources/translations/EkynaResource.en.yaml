@@ -1,0 +1,16 @@
+permission:
+    list: List
+    read: Read
+    create: Create
+    create_child: Create child
+    update: Edit
+    delete: Remove
+    search: Search
+message:
+    persist:
+        success: The resource has been successfully saved.
+        failure: The application encountered a database error. Resource has not been saved.
+    remove:
+        success: The resource has been successfully removed.
+        integrity: This resource is associated to other resources and cannot be deleted.
+        failure: The application encountered a database error. Resource has not been deleted.

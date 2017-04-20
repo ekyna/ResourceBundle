@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Ekyna\Bundle\ResourceBundle\Doctrine\Handler;
 
-use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 use Doctrine\ORM\EntityManager;
+use Doctrine\Persistence\Mapping\ClassMetadata;
 use Gedmo\Exception\InvalidMappingException;
 use Gedmo\Sluggable\Handler\SlugHandlerInterface;
 use Gedmo\Sluggable\Mapping\Event\SluggableAdapter;
@@ -14,9 +16,6 @@ use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 /**
  * Class TreeTranslationSlugHandler
  * @package Ekyna\Bundle\AdminBundle\Doctrine\Handler
- * @author Gediminas Morkevicius <gediminas.morkevicius@gmail.com>
- * @author Gonzalo Vilaseca <gvilaseca@reiss.co.uk>
- * @see https://github.com/Sylius/Sylius/blob/master/src/Sylius/Bundle/TranslationBundle/GedmoHandler/TranslationSlugHandler.php
  * @author  Etienne Dauvergne <contact@ekyna.com>
  */
 class TreeTranslationSlugHandler implements SlugHandlerInterface
@@ -87,7 +86,6 @@ class TreeTranslationSlugHandler implements SlugHandlerInterface
         $this->suffix = isset($options['suffix']) ? $options['suffix'] : '';
 
         if (!$this->isInsert && !$needToChangeSlug) {
-            /** @noinspection PhpParamsInspection */
             $changeSet = $ea->getObjectChangeSet($this->om->getUnitOfWork(), $object);
             if (isset($changeSet[$options['relationParentRelationField']])) {
                 $needToChangeSlug = true;
@@ -96,8 +94,8 @@ class TreeTranslationSlugHandler implements SlugHandlerInterface
 
         if ($needToChangeSlug) {
             $language = new ExpressionLanguage();
-            if (isset($options['skipExpression']) && 0 < strlen($expression = $options['skipExpression'])) {
-                if ((bool)$language->evaluate($expression, array('object' => $object))) {
+            if (isset($options['skipExpression']) && !empty($expression = $options['skipExpression'])) {
+                if ($language->evaluate($expression, ['object' => $object])) {
                     $needToChangeSlug = false;
                 }
             }
@@ -120,14 +118,14 @@ class TreeTranslationSlugHandler implements SlugHandlerInterface
         $wrapped = AbstractWrapper::wrap($relation, $this->om);
         if ($parent = $wrapped->getPropertyValue($options['relationParentRelationField'])) {
 
-            if (isset($options['parentSkipExpression']) && 0 < strlen($expression = $options['parentSkipExpression'])) {
+            if (isset($options['parentSkipExpression']) && !empty($expression = $options['parentSkipExpression'])) {
                 $language = new ExpressionLanguage();
-                if ((bool)$language->evaluate($expression, array('parent' => $parent))) {
+                if ($language->evaluate($expression, ['parent' => $parent])) {
                     return;
                 }
             }
 
-            $translation = call_user_func_array(array($parent, $options['translate']), array($locale));
+            $translation = call_user_func_array([$parent, $options['translate']], [$locale]);
 
             $this->parentSlug = $translation->{$options['parentFieldMethod']}();
 
@@ -148,8 +146,10 @@ class TreeTranslationSlugHandler implements SlugHandlerInterface
     public static function validate(array $options, ClassMetadata $meta)
     {
         if (!$meta->isSingleValuedAssociation($options['relationField'])) {
-            /** @noinspection PhpUndefinedFieldInspection */
-            throw new InvalidMappingException("Unable to find tree parent slug relation through field - [{$options['relationParentRelationField']}] in class - {$meta->name}");
+            throw new InvalidMappingException(
+                'Unable to find tree parent slug relation through field - ' .
+                "[{$options['relationParentRelationField']}] in class - {$meta->name}"
+            );
         }
 //      TODO Check parent relation in translatable entity is single valued
 //      (Note: don't know if that's possible here as we need the relationField class metadada)
@@ -221,10 +221,10 @@ class TreeTranslationSlugHandler implements SlugHandlerInterface
         $slug = $text . $this->suffix;
 
         if (strlen($this->parentSlug)) {
-            $slug = $this->parentSlug.$this->usedPathSeparator.$slug;
+            $slug = $this->parentSlug . $this->usedPathSeparator . $slug;
         } else {
             // if no parentSlug, apply our prefix
-            $slug = $this->prefix.$slug;
+            $slug = $this->prefix . $slug;
         }
 
         return $slug;

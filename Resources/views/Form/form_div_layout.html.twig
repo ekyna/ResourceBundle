@@ -1,0 +1,43 @@
+{% block ekyna_resource_widget %}
+{% apply spaceless %}
+{% if expanded %}
+    {{ block('choice_widget_expanded') }}
+{% else %}
+    {{ block('ekyna_resource_widget_collapsed') }}
+{% endif %}
+{% endapply %}
+{% endblock ekyna_resource_widget %}
+
+
+{% block ekyna_resource_widget_collapsed %}
+{% apply spaceless %}
+{% if new_route is defined or list_route is defined %}
+<div class="input-group entity-widget">
+{% endif %}
+{{ block('choice_widget_collapsed') }}
+{% if new_route is defined or list_route is defined %}
+    <span class="input-group-btn">
+    {% if new_route is defined %}
+        <button class="btn btn-default new-resource" type="button" data-path="{{ path(new_route, new_route_params) }}">
+            <span class="fa fa-plus"></span>
+        </button>
+    {% endif %}
+    {% if list_route is defined %}
+        <button class="btn btn-default list-resource" type="button" data-path="{{ path(list_route, list_route_params) }}">
+            <span class="fa fa-search"></span>
+        </button>
+    {% endif %}
+    </span>
+</div>
+{% endif %}
+{% endapply %}
+{% endblock ekyna_resource_widget_collapsed %}
+
+
+{%- block ekyna_resource_search_widget -%}
+    {%- set attr = attr|merge({
+        'class': 'resource-search form-control',
+        'data-placeholder': placeholder|trans
+    }) -%}
+    {{- block('choice_widget_collapsed') -}}
+{%- endblock ekyna_resource_search_widget -%}

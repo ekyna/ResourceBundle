@@ -1,0 +1,4 @@
+uploadable:
+    name_is_mandatory: Please provide the file name.
+    file_is_mandatory: Please pick a file.
+    leave_blank: Leave this field blank if you don't pick a file.
