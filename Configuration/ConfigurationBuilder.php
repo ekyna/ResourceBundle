@@ -314,8 +314,9 @@ class ConfigurationBuilder
                 'name'        => Inflector::camelize($this->resourceId),
                 'parent_id'   => $this->options['parent'],
                 'classes'     => [
-                    'entity'    => $this->options['entity'],
-                    'form_type' => $this->getServiceClass('form'), // TODO
+                    'entity'     => $this->options['entity'],
+                    'form_type'  => $this->getServiceClass('form'), // TODO
+                    'table_type' => $this->getServiceClass('table'), // TODO
                 ],
                 'event'       => $this->options['event'],
                 'templates'   => $this->options['templates'],
@@ -327,7 +328,7 @@ class ConfigurationBuilder
                 ->setFactory([new DI\Reference('ekyna_resource.configuration_factory'), 'createConfiguration'])
                 ->setArguments([$config])
                 ->addTag('ekyna_resource.configuration', [
-                        'alias' => sprintf('%s_%s', $this->namespace, $this->resourceId)]
+                    'alias' => sprintf('%s_%s', $this->namespace, $this->resourceId)]
                 );
 
             $this->container->setDefinition($id, $definition);
@@ -488,9 +489,7 @@ class ConfigurationBuilder
             $definition = new DI\Definition($this->getServiceClass('table'));
             $definition
                 ->setArguments([$this->options['entity']])
-                ->addTag('table.type', [
-                    'alias' => sprintf('%s_%s', $this->namespace, $this->resourceId),
-                ]);
+                ->addTag('table.type');
 
             $this->container->setDefinition($id, $definition);
         }
