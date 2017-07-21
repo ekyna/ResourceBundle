@@ -40,7 +40,7 @@ interface ConstantsInterface
      * Returns the constant choices.
      *
      * @param array $filter The values to filter.
-     * @param int   $mode   The filter mode (0: restrict, 1: exclude).
+     * @param int   $mode   The filter mode (0: exclusion, 1: restriction).
      *
      * @return array
      */
