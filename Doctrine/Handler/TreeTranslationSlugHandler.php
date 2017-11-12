@@ -165,10 +165,15 @@ class TreeTranslationSlugHandler implements SlugHandlerInterface
         if (!$this->isInsert) {
             $config['pathSeparator'] = $this->usedPathSeparator;
 
+            $wrapped = AbstractWrapper::wrap($object, $this->om);
+            $meta = $wrapped->getMetadata();
+
             // Overwrite original data
             $uow = $this->om->getUnitOfWork();
             $changeSet = $uow->getEntityChangeSet($object);
-            $oldSlug = $changeSet[$config['slug']][0];
+            $oldSlug = isset($changeSet[$config['slug']])
+                ? $changeSet[$config['slug']][0]
+                : $meta->getReflectionProperty($config['slug'])->getValue($object);
             $oid = spl_object_hash($object);
             $ea->setOriginalObjectProperty($uow, $oid, $config['slug'], $oldSlug);
 
@@ -177,8 +182,6 @@ class TreeTranslationSlugHandler implements SlugHandlerInterface
                 return;
             }
 
-            $wrapped = AbstractWrapper::wrap($object, $this->om);
-            $meta = $wrapped->getMetadata();
             $ea->replaceRelative($object, $config, $oldSlug . $config['pathSeparator'], $slug);
 
             // Update in memory objects
