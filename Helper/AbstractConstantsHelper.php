@@ -28,6 +28,16 @@ abstract class AbstractConstantsHelper
     }
 
     /**
+     * Returns the translator.
+     *
+     * @return TranslatorInterface
+     */
+    public function getTranslator()
+    {
+        return $this->translator;
+    }
+
+    /**
      * Renders the state label.
      *
      * @param string $label
