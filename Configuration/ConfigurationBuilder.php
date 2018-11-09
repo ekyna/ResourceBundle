@@ -208,16 +208,17 @@ class ConfigurationBuilder
         /** @noinspection PhpUnusedParameterInspection */
         $resolver
             ->setDefaults([
-                'entity'      => null,
-                'repository'  => null,
-                'operator'    => self::DEFAULT_OPERATOR,
-                'controller'  => self::DEFAULT_CONTROLLER,
-                'templates'   => null,
-                'form'        => null,
-                'table'       => null,
-                'event'       => null,
-                'parent'      => null,
-                'translation' => null,
+                'entity'       => null,
+                'repository'   => null,
+                'operator'     => self::DEFAULT_OPERATOR,
+                'controller'   => self::DEFAULT_CONTROLLER,
+                'templates'    => null,
+                'form'         => null,
+                'table'        => null,
+                'event'        => null,
+                'parent'       => null,
+                'translation'  => null,
+                'trans_prefix' => null,
             ])
             ->setAllowedTypes('entity', 'string')
             ->setAllowedTypes('repository', ['null', 'string'])
@@ -229,6 +230,7 @@ class ConfigurationBuilder
             ->setAllowedTypes('event', ['null', 'string', 'array'])
             ->setAllowedTypes('parent', ['null', 'string'])
             ->setAllowedTypes('translation', ['null', 'array'])
+            ->setAllowedTypes('trans_prefix', ['null', 'string'])
             ->setAllowedValues('entity', $classExists)
             ->setAllowedValues('operator', $validOperator)
             ->setAllowedValues('controller', $validController)
@@ -321,6 +323,7 @@ class ConfigurationBuilder
                 'event'       => $this->options['event'],
                 'templates'   => $this->options['templates'],
                 'translation' => $translation,
+                'trans_prefix' => $this->options['trans_prefix'] ?: $this->namespace . '.' . $this->resourceId,
             ];
 
             $definition = new DI\Definition(self::CONFIGURATION);
