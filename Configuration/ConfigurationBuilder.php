@@ -475,6 +475,8 @@ class ConfigurationBuilder
                 ->addTag('form.type');
 
             $this->container->setDefinition($id, $definition);
+        } else {
+            // TODO Check service class
         }
     }
 
@@ -495,6 +497,8 @@ class ConfigurationBuilder
                 ->addTag('table.type');
 
             $this->container->setDefinition($id, $definition);
+        } else {
+            // TODO Check service class
         }
     }
 

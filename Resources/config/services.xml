@@ -136,6 +136,14 @@
             <tag name="serializer.denormalizer"/>
         </service>
 
+        <!-- Security voter -->
+        <service id="ekyna_resource.security.resource_voter"
+                 class="Ekyna\Bundle\ResourceBundle\Service\Security\ResourceVoter">
+            <argument type="service" id="ekyna_resource.configuration_registry"/>
+            <argument type="service" id="security.access.decision_manager"/>
+            <tag name="security.voter"/>
+        </service>
+
     </services>
 
 </container>
