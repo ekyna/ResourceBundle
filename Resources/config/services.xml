@@ -135,10 +135,16 @@
             <tag name="serializer.normalizer"/>
             <tag name="serializer.denormalizer"/>
         </service>
+        <service id="ekyna_resource.serializer.default_resource_normalizer"
+                 class="Ekyna\Component\Resource\Bridge\Symfony\Serializer\ResourceNormalizer"
+                 parent="ekyna_resource.serializer.resource_normalizer">
+            <tag name="serializer.normalizer" priority="-2"/>
+            <tag name="serializer.denormalizer" priority="-2"/>
+        </service>
 
         <!-- Security voter -->
         <service id="ekyna_resource.security.resource_voter"
-                 class="Ekyna\Bundle\ResourceBundle\Service\Security\ResourceVoter">
+                 class="Ekyna\Component\Resource\Bridge\Symfony\Security\ResourceVoter">
             <argument type="service" id="ekyna_resource.configuration_registry"/>
             <argument type="service" id="security.access.decision_manager"/>
             <tag name="security.voter"/>
