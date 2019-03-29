@@ -16,7 +16,7 @@ class FosElasticaPass implements CompilerPassInterface
 {
     // TODO support other drivers than ORM
     const FOS_ELASTICA_MANAGER_ORM = 'fos_elastica.manager.orm';
-    const RESOURCE_LOCALE_PROVIDER = 'ekyna_resource.locale.request_provider';
+    const RESOURCE_LOCALE_PROVIDER = 'ekyna_resource.locale_provider';
 
     /**
      * {@inheritdoc}

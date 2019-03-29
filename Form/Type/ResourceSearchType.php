@@ -66,7 +66,7 @@ class ResourceSearchType extends AbstractType
         }
         $view->vars['attr']['data-allow-clear'] = $allowClear;
         $view->vars['attr']['data-format'] = $options['format_function']
-            ?: "if(!data.id)return 'Rechercher'; return $('<span>'+data.choice_label+'</span>');";
+            ?: "if(!data.id)return 'Rechercher'; return $('<span>'+data.text+'</span>');";
 
         // CSS class (to trigger JS form plugin)
         $classes = isset($view->vars['attr']['class']) ?

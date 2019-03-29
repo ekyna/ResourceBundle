@@ -387,7 +387,7 @@ class ConfigurationBuilder
             if (is_array($this->options['translation'])) {
                 if (!$definition->hasMethodCall('setLocaleProvider')) {
                     $definition->addMethodCall('setLocaleProvider', [
-                        new DI\Reference('ekyna_resource.locale.request_provider') // TODO alias / configurable ?
+                        new DI\Reference('ekyna_resource.locale_provider') // TODO alias / configurable ?
                     ]);
                 }
                 if (!$definition->hasMethodCall('setTranslatableFields')) {
@@ -412,7 +412,7 @@ class ConfigurationBuilder
         if (is_array($this->options['translation'])) {
             $definition
                 ->addMethodCall('setLocaleProvider', [
-                    new DI\Reference('ekyna_resource.locale.request_provider') // TODO alias / configurable ?
+                    new DI\Reference('ekyna_resource.locale_provider') // TODO alias / configurable ?
                 ])
                 ->addMethodCall('setTranslatableFields', [
                     $this->options['translation']['fields'],
