@@ -65,7 +65,8 @@ class LocaleChoiceType extends LocaleType
 
         $locales = [];
         foreach ($this->locales as $locale) {
-            $locales[Intl::getLocaleBundle()->getLocaleName($locale)] = $locale;
+            $name = Intl::getLocaleBundle()->getLocaleName($locale);
+            $locales[mb_convert_case($name, MB_CASE_TITLE)] = $locale;
         }
 
         return $this->choiceList = new ArrayChoiceList($locales, $value);
