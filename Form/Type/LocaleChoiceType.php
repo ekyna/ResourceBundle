@@ -2,9 +2,9 @@
 
 namespace Ekyna\Bundle\ResourceBundle\Form\Type;
 
-use Symfony\Component\Form\ChoiceList\ArrayChoiceList;
-use Symfony\Component\Form\Extension\Core\Type\LocaleType;
-use Symfony\Component\Intl\Intl;
+use Ekyna\Bundle\ResourceBundle\Form\ChoiceList\LocaleChoiceLoader;
+use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -13,17 +13,12 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  * @package Ekyna\Bundle\ResourceBundle\Form\Type
  * @author  Etienne Dauvergne <contact@ekyna.com>
  */
-class LocaleChoiceType extends LocaleType
+class LocaleChoiceType extends AbstractType
 {
     /**
      * @var array
      */
     private $locales;
-
-    /**
-     * @var ArrayChoiceList
-     */
-    private $choiceList;
 
 
     /**
@@ -44,7 +39,15 @@ class LocaleChoiceType extends LocaleType
         parent::configureOptions($resolver);
 
         $resolver
-            ->setDefault('label', 'ekyna_core.field.locale')
+            ->setDefaults([
+                'label'   => 'ekyna_core.field.locale',
+                'locales' => $this->locales,
+                'choice_loader' => function (Options $options) {
+                    return new LocaleChoiceLoader($options['locales']);
+                },
+                'choice_translation_domain' => false,
+            ])
+            ->setAllowedTypes('locales', ['array', 'null'])
             ->setNormalizer('placeholder', function (Options $options, $value) {
                 if (empty($value) && !$options['required'] && !$options['multiple']) {
                     $value = 'ekyna_core.value.none';
@@ -57,18 +60,16 @@ class LocaleChoiceType extends LocaleType
     /**
      * @inheritDoc
      */
-    public function loadChoiceList($value = null)
+    public function getParent()
     {
-        if (null !== $this->choiceList) {
-            return $this->choiceList;
-        }
+        return ChoiceType::class;
+    }
 
-        $locales = [];
-        foreach ($this->locales as $locale) {
-            $name = Intl::getLocaleBundle()->getLocaleName($locale);
-            $locales[mb_convert_case($name, MB_CASE_TITLE)] = $locale;
-        }
-
-        return $this->choiceList = new ArrayChoiceList($locales, $value);
+    /**
+     * @inheritDoc
+     */
+    public function getBlockPrefix()
+    {
+        return 'locale';
     }
 }
