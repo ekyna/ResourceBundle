@@ -23,12 +23,13 @@
         </service>
 
         <!-- Locale provider -->
-        <service id="ekyna_resource.locale_provider"
+        <service id="Ekyna\Component\Resource\Locale\LocaleProviderInterface"
                  class="Ekyna\Component\Resource\Bridge\Symfony\Locale\RequestLocaleProvider">
             <argument>%locales%</argument>
             <argument>%locale%</argument>
             <tag name="kernel.event_subscriber" priority="98"/>
         </service>
+        <service id="ekyna_resource.locale_provider" alias="Ekyna\Component\Resource\Locale\LocaleProviderInterface"/>
 
         <!-- Resource event queue -->
         <service id="ekyna_resource.event_queue"
