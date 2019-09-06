@@ -8,6 +8,7 @@ use Ekyna\Bundle\AdminBundle\Controller;
 use Ekyna\Component\Resource\Configuration\Configuration;
 use Ekyna\Component\Resource\Doctrine\ORM;
 use Ekyna\Component\Resource\Event\ResourceEventInterface;
+use Ekyna\Component\Resource\Exception\RuntimeException;
 use Ekyna\Component\Resource\Operator;
 use Ekyna\Component\Table\TableTypeInterface;
 use Symfony\Component\DependencyInjection as DI;
@@ -87,9 +88,9 @@ class ConfigurationBuilder
      * @param string $resourceId
      * @param array  $options
      *
+     * @return ConfigurationBuilder
      * @throws \RuntimeException
      *
-     * @return ConfigurationBuilder
      */
     public function configure($namespace, $resourceId, array $options)
     {
@@ -278,19 +279,38 @@ class ConfigurationBuilder
     }
 
     /**
-     * Creates the entity class parameter.
+     * Creates the entity classes parameters.
      */
     private function createEntityClassParameter()
     {
+        // Entity class parameter
         $id = $this->getServiceId('class');
         if (!$this->container->hasParameter($id)) {
             $this->container->setParameter($id, $this->options['entity']);
         }
 
+        // Entity inheritance mapping
         $this->configureInheritanceMapping(
             $this->namespace . '.' . $this->resourceId,
             $this->options['entity'],
             $this->options['repository']
+        );
+
+        if (!$this->isTranslationConfigured()) {
+            return;
+        }
+
+        // Translation class parameter
+        $id = $this->getServiceId('class', true);
+        if (!$this->container->hasParameter($id)) {
+            $this->container->setParameter($id, $this->options['translation']['entity']);
+        }
+
+        // Translation inheritance mapping
+        $this->configureInheritanceMapping(
+            $this->namespace . '.' . $this->resourceId . '.translation',
+            $this->options['translation']['entity'],
+            $this->options['translation']['repository']
         );
     }
 
@@ -303,7 +323,7 @@ class ConfigurationBuilder
         if (!$this->container->has($id)) {
 
             $translation = null;
-            if (is_array($this->options['translation'])) {
+            if ($this->isTranslationConfigured()) {
                 $translation = [
                     'entity' => $this->options['translation']['entity'],
                     'fields' => $this->options['translation']['fields'],
@@ -311,18 +331,18 @@ class ConfigurationBuilder
             }
 
             $config = [
-                'namespace'   => $this->namespace,
-                'id'          => $this->resourceId,
-                'name'        => Inflector::camelize($this->resourceId),
-                'parent_id'   => $this->options['parent'],
-                'classes'     => [
+                'namespace'    => $this->namespace,
+                'id'           => $this->resourceId,
+                'name'         => Inflector::camelize($this->resourceId),
+                'parent_id'    => $this->options['parent'],
+                'classes'      => [
                     'entity'     => $this->options['entity'],
                     'form_type'  => $this->getServiceClass('form'), // TODO
                     'table_type' => $this->getServiceClass('table'), // TODO
                 ],
-                'event'       => $this->options['event'],
-                'templates'   => $this->options['templates'],
-                'translation' => $translation,
+                'event'        => $this->options['event'],
+                'templates'    => $this->options['templates'],
+                'translation'  => $translation,
                 'trans_prefix' => $this->options['trans_prefix'] ?: $this->namespace . '.' . $this->resourceId,
             ];
 
@@ -331,7 +351,8 @@ class ConfigurationBuilder
                 ->setFactory([new DI\Reference('ekyna_resource.configuration_factory'), 'createConfiguration'])
                 ->setArguments([$config])
                 ->addTag('ekyna_resource.configuration', [
-                    'alias' => sprintf('%s_%s', $this->namespace, $this->resourceId)]
+                        'alias' => sprintf('%s_%s', $this->namespace, $this->resourceId),
+                    ]
                 );
 
             $this->container->setDefinition($id, $definition);
@@ -339,22 +360,42 @@ class ConfigurationBuilder
     }
 
     /**
-     * Creates the Table service definition.
+     * Creates the metadata service definition.
      */
     private function createMetadataDefinition()
     {
-        $id = $this->getServiceId('metadata');
-        if (!$this->container->has($id)) {
-            $definition = new DI\Definition(self::CLASS_METADATA);
-            $definition
-                ->setFactory([new DI\Reference($this->getManagerServiceId()), 'getClassMetadata'])
-                ->setArguments([
-                    $this->container->getParameter($this->getServiceId('class')),
-                ]);
-            //->setPublic(false)
+        $this->configureMetadata($this->getServiceId('metadata'), $this->getServiceId('class'));
 
-            $this->container->setDefinition($id, $definition);
+        if ($this->isTranslationConfigured()) {
+            $this->configureMetadata($this->getServiceId('metadata', true), $this->getServiceId('class', true));
         }
+    }
+
+    /**
+     * Configures the metadata service.
+     *
+     * @param string $id
+     * @param string $entityClass
+     *
+     * @return DI\Definition
+     */
+    private function configureMetadata(string $id, string $entityClass): DI\Definition
+    {
+        if ($this->container->has($id)) {
+            return $this->container->getDefinition($id);
+        }
+
+        $definition = new DI\Definition(self::CLASS_METADATA);
+        $definition
+            ->setFactory([new DI\Reference($this->getManagerServiceId()), 'getClassMetadata'])
+            ->setArguments([
+                $this->container->getParameter($entityClass),
+            ]);
+        //->setPublic(false)
+
+        $this->container->setDefinition($id, $definition);
+
+        return $definition;
     }
 
     /**
@@ -373,52 +414,71 @@ class ConfigurationBuilder
      */
     private function createRepositoryDefinition()
     {
-        $id = $this->getServiceId('repository');
-        $class = $this->getServiceClass('repository');
+        $definition = $this->configureRepositoryDefinition(
+            $this->getServiceId('repository'),
+            $this->getServiceClass('repository'),
+            $this->getServiceId('manager'),
+            $this->getServiceId('metadata')
+        );
 
-        // If definition exists
-        if ($this->container->has($id)) {
-            $definition = $this->container->getDefinition($id);
-            // Change class if overridden
-            if ($definition->getClass() != $class) {
-                $definition->setClass($class);
-            }
-            // Add method class if not sets.
-            if (is_array($this->options['translation'])) {
-                if (!$definition->hasMethodCall('setLocaleProvider')) {
-                    $definition->addMethodCall('setLocaleProvider', [
-                        new DI\Reference('ekyna_resource.locale_provider') // TODO alias / configurable ?
-                    ]);
-                }
-                if (!$definition->hasMethodCall('setTranslatableFields')) {
-                    $definition->addMethodCall('setTranslatableFields', [
-                        $this->options['translation']['fields'],
-                    ]);
-                }
-            }
-
+        if (!$this->isTranslationConfigured()) {
             return;
         }
 
-        // Definition not found: create it.
+        if (!$definition->hasMethodCall('setLocaleProvider')) {
+            $definition->addMethodCall('setLocaleProvider', [
+                new DI\Reference('ekyna_resource.locale_provider') // TODO alias / configurable ?
+            ]);
+        }
+        if (!$definition->hasMethodCall('setTranslatableFields')) {
+            $definition->addMethodCall('setTranslatableFields', [
+                $this->options['translation']['fields'],
+            ]);
+        }
+        $this->configureRepositoryDefinition(
+            $this->getServiceId('repository', true),
+            $this->getServiceClass('repository', true),
+            $this->getServiceId('manager'),
+            $this->getServiceId('metadata', true)
+        );
+    }
 
-        $definition = new DI\Definition($class = $this->getServiceClass('repository'));
+    /**
+     * Configures the repository service definition.
+     *
+     * @param string $id
+     * @param string $repositoryClass
+     * @param string $managerId
+     * @param string $metadataId
+     *
+     * @return DI\Definition
+     */
+    private function configureRepositoryDefinition(
+        string $id,
+        string $repositoryClass,
+        string $managerId,
+        string $metadataId
+    ): DI\Definition {
+        if ($this->container->has($id)) {
+            $definition = $this->container->getDefinition($id);
+
+            // Change class if overridden
+            if ($definition->getClass() != $repositoryClass) {
+                $definition->setClass($repositoryClass);
+            }
+
+            return $definition;
+        }
+
+        $definition = new DI\Definition($repositoryClass);
         $definition->setArguments([
-            new DI\Reference($this->getServiceId('manager')),
-            new DI\Reference($this->getServiceId('metadata')),
+            new DI\Reference($managerId),
+            new DI\Reference($metadataId),
         ]);
 
-        // TODO if repository class implements translatable
-        if (is_array($this->options['translation'])) {
-            $definition
-                ->addMethodCall('setLocaleProvider', [
-                    new DI\Reference('ekyna_resource.locale_provider') // TODO alias / configurable ?
-                ])
-                ->addMethodCall('setTranslatableFields', [
-                    $this->options['translation']['fields'],
-                ]);
-        }
         $this->container->setDefinition($id, $definition);
+
+        return $definition;
     }
 
     /**
@@ -507,30 +567,22 @@ class ConfigurationBuilder
      */
     private function configureTranslations()
     {
-        if (null !== array_key_exists('translation', $this->options) && is_array($this->options['translation'])) {
-            $translatable = $this->options['entity'];
-            $translation = $this->options['translation']['entity'];
-
-            $id = sprintf('%s.%s_translation', $this->namespace, $this->resourceId);
-
-            // Load metadata event mapping
-            $mapping = [
-                $translatable => $translation,
-                $translation  => $translatable,
-            ];
-            if ($this->container->hasParameter('ekyna_resource.translation_mapping')) {
-                $mapping = array_merge($this->container->getParameter('ekyna_resource.translation_mapping'), $mapping);
-            }
-            $this->container->setParameter('ekyna_resource.translation_mapping', $mapping);
-
-            // Translation class parameter
-            if (!$this->container->hasParameter($id . '.class')) {
-                $this->container->setParameter($id . '.class', $translation);
-            }
-
-            // Inheritance mapping
-            $this->configureInheritanceMapping($id, $translation, $this->options['translation']['repository']);
+        if (!$this->isTranslationConfigured()) {
+            return;
         }
+
+        $translatable = $this->options['entity'];
+        $translation = $this->options['translation']['entity'];
+
+        // Load metadata event mapping
+        $mapping = [
+            $translatable => $translation,
+            $translation  => $translatable,
+        ];
+        if ($this->container->hasParameter('ekyna_resource.translation_mapping')) {
+            $mapping = array_merge($this->container->getParameter('ekyna_resource.translation_mapping'), $mapping);
+        }
+        $this->container->setParameter('ekyna_resource.translation_mapping', $mapping);
     }
 
     /**
@@ -580,30 +632,49 @@ class ConfigurationBuilder
      * Returns the service id for the given name.
      *
      * @param string $name
+     * @param bool   $translation
      *
      * @return string
      */
-    private function getServiceId($name)
+    private function getServiceId(string $name, bool $translation = false)
     {
-        return sprintf('%s.%s.%s', $this->namespace, $this->resourceId, $name);
+        $format = '%s.%s.%s';
+
+        if ($translation) {
+            if (!$this->isTranslationConfigured()) {
+                throw new RuntimeException("Translation is not defined");
+            }
+            $format = '%s.%s_translation.%s';
+        }
+
+        return sprintf($format, $this->namespace, $this->resourceId, $name);
     }
 
     /**
      * Returns the service class for the given name.
      *
      * @param string $name
-     *
-     * @throws \RuntimeException
+     * @param bool   $translation
      *
      * @return string|null
+     * @throws \RuntimeException
+     *
      */
-    private function getServiceClass($name)
+    private function getServiceClass(string $name, bool $translation = false)
     {
-        $serviceId = $this->getServiceId($name);
+        $serviceId = $this->getServiceId($name, $translation);
 
         $parameterId = $serviceId . '.class';
         if ($this->container->hasParameter($parameterId)) {
             $class = $this->container->getParameter($parameterId);
+        } elseif ($translation) {
+            if (!$this->isTranslationConfigured()) {
+                throw new \RuntimeException("Requested service class on a non translatable entity");
+            }
+            if (!isset($this->options['translation'][$name])) {
+                throw new \RuntimeException(sprintf('Undefined translation "%s" service class.', $name));
+            }
+            $class = $this->options['translation'][$name];
         } elseif (array_key_exists($name, $this->options)) {
             $class = $this->options[$name];
         } else {
@@ -611,5 +682,15 @@ class ConfigurationBuilder
         }
 
         return $class;
+    }
+
+    /**
+     * Returns whether translation is configured for this resource.
+     *
+     * @return bool
+     */
+    private function isTranslationConfigured(): bool
+    {
+        return isset($this->options['translation']) && !empty($this->options['translation']);
     }
 }
