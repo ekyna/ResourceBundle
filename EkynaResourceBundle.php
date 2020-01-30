@@ -2,8 +2,7 @@
 
 namespace Ekyna\Bundle\ResourceBundle;
 
-use Ekyna\Bundle\ResourceBundle\DependencyInjection\Compiler\FosElasticaPass;
-use Ekyna\Bundle\ResourceBundle\DependencyInjection\Compiler\ResourceRegistryPass;
+use Ekyna\Bundle\ResourceBundle\DependencyInjection\Compiler;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\EventDispatcher\DependencyInjection\RegisterListenersPass;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
@@ -16,7 +15,7 @@ use Symfony\Component\HttpKernel\Bundle\Bundle;
 class EkynaResourceBundle extends Bundle
 {
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function build(ContainerBuilder $container)
     {
@@ -28,7 +27,7 @@ class EkynaResourceBundle extends Bundle
             'resource.event_subscriber'
         ));
 
-        $container->addCompilerPass(new ResourceRegistryPass());
-        $container->addCompilerPass(new FosElasticaPass());
+        $container->addCompilerPass(new Compiler\ResourceRegistryPass());
+        $container->addCompilerPass(new Compiler\SearchRepositoryPass());
     }
 }

@@ -31,6 +31,9 @@
         </service>
         <service id="ekyna_resource.locale_provider" alias="Ekyna\Component\Resource\Locale\LocaleProviderInterface"/>
 
+        <!-- Resource search -->
+        <service id="Ekyna\Component\Resource\Search\Search"/>
+
         <!-- Resource event queue -->
         <service id="ekyna_resource.event_queue"
                  class="Ekyna\Component\Resource\Event\EventQueue"
