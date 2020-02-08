@@ -17,7 +17,6 @@
     "license": "MIT",
     "require": {
         "php": ">=7.0",
-        "symfony/framework-bundle": "~3.0",
         "ekyna/core-bundle": "0.7.x-dev",
         "ekyna/resource": "0.7.x-dev"
     },

@@ -12,7 +12,7 @@ abstract class AbstractConstants implements ConstantsInterface
     /**
      * @inheritdoc
      */
-    public static function getConstants()
+    public static function getConstants(): array
     {
         return array_keys(static::getConfig());
     }
@@ -20,7 +20,7 @@ abstract class AbstractConstants implements ConstantsInterface
     /**
      * @inheritdoc
      */
-    public static function getChoices(array $filter = [], $mode = 0)
+    public static function getChoices(array $filter = [], $mode = self::FILTER_EXCLUDE)
     {
         if (0 !== $mode && 1 !== $mode) {
             throw new \InvalidArgumentException('Invalid filter mode');
@@ -54,7 +54,7 @@ abstract class AbstractConstants implements ConstantsInterface
     /**
      * @inheritdoc
      */
-    public static function getDefaultChoice()
+    public static function getDefaultChoice(): string
     {
         if ($default = reset(static::getConstants())) {
             return $default;
@@ -66,7 +66,7 @@ abstract class AbstractConstants implements ConstantsInterface
     /**
      * @inheritdoc
      */
-    public static function getLabel($constant)
+    public static function getLabel(string $constant): string
     {
         if (null === $constant) {
             return 'ekyna_core.value.undefined';
@@ -78,9 +78,25 @@ abstract class AbstractConstants implements ConstantsInterface
     }
 
     /**
+     * Returns the constant's theme.
+     *
+     * @param string $constant
+     *
+     * @return string
+     */
+    public static function getTheme(string $constant): ?string
+    {
+        static::isValid($constant, true);
+
+        $config = static::getConfig()[$constant];
+
+        return $config[1] ?? null;
+    }
+
+    /**
      * @inheritdoc
      */
-    public static function isValid($constant, $throwException = false)
+    public static function isValid(string $constant, bool $throwException = false): bool
     {
         if (array_key_exists($constant, static::getConfig())) {
             return true;
@@ -91,5 +107,14 @@ abstract class AbstractConstants implements ConstantsInterface
         }
 
         return false;
+    }
+
+    /**
+     * Disabled constructor.
+     *
+     * @codeCoverageIgnore
+     */
+    final private function __construct()
+    {
     }
 }

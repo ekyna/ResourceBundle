@@ -27,14 +27,14 @@ interface ConstantsInterface
      * </code>
      * @return array
      */
-    public static function getConfig();
+    public static function getConfig(): array;
 
     /**
      * Returns the constants.
      *
      * @return array
      */
-    public static function getConstants();
+    public static function getConstants(): array;
 
     /**
      * Returns the constant choices.
@@ -44,31 +44,40 @@ interface ConstantsInterface
      *
      * @return array
      */
-    public static function getChoices(array $filter = [], $mode = 0);
+    public static function getChoices(array $filter = [], int $mode = self::FILTER_EXCLUDE);
 
     /**
      * Returns the default constant choice.
      *
-     * @return mixed
+     * @return string
      */
-    public static function getDefaultChoice();
+    public static function getDefaultChoice(): string;
 
     /**
      * Returns the label for the given constant.
      *
-     * @param mixed $constant
+     * @param string $constant
      *
      * @return string
      */
-    public static function getLabel($constant);
+    public static function getLabel(string $constant): string;
+
+    /**
+     * Returns the theme for the given constant.
+     *
+     * @param string $constant
+     *
+     * @return string|null
+     */
+    public static function getTheme(string $constant): ?string;
 
     /**
      * Returns whether the constant is valid or not.
      *
-     * @param mixed   $constant
+     * @param string   $constant
      * @param boolean $throwException
      *
      * @return bool
      */
-    public static function isValid($constant, $throwException = false);
+    public static function isValid(string $constant, bool $throwException = false): bool;
 }
