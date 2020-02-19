@@ -120,12 +120,6 @@
             <tag name="form.type"/>
         </service>
 
-        <!-- Table types -->
-        <service id="Ekyna\Bundle\ResourceBundle\Table\Column\ConstantChoiceType">
-            <argument type="service" id="Symfony\Component\Translation\TranslatorInterface"/>
-            <tag name="table.column_type"/>
-        </service>
-
         <!-- Serialization -->
         <service id="ekyna_resource.serializer.resource_normalizer"
                  class="Ekyna\Component\Resource\Serializer\AbstractResourceNormalizer"
