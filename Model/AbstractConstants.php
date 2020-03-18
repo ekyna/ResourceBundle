@@ -36,11 +36,11 @@ abstract class AbstractConstants implements ConstantsInterface
         foreach (static::getConfig() as $constant => $config) {
             if (!empty($filter)) {
                 // Exclusion
-                if ($mode === 0 && in_array($constant, $filter, true)) {
+                if (($mode === 0) && in_array($constant, $filter, true)) {
                     continue;
                 }
                 // Restriction
-                if ($mode === 1 && !in_array($constant, $filter, true)) {
+                if (($mode === 1) && !in_array($constant, $filter, true)) {
                     continue;
                 }
             }

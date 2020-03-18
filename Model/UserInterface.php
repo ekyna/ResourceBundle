@@ -16,5 +16,5 @@ interface UserInterface extends BaseUser
      *
      * @return string
      */
-    public function getSecurityId();
+    public function getSecurityId(): string;
 }
