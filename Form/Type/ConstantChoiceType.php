@@ -23,42 +23,50 @@ class ConstantChoiceType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver
-            ->setDefault('class', null)
+            ->setRequired('class')
+            ->setDefault('accessor', 'getChoices')
             ->setDefault('choices', function (Options $options, $value) {
                 if (!empty($value)) {
                     return $value;
                 }
 
-                $this->validateConstantClass($class = $options['class']);
+                $class = $options['class'];
+                $method = $options['accessor'];
+                $this->validateCallback($class, $method);
 
-                return call_user_func([$class, 'getChoices']);
+                return call_user_func([$class, $method]);
             })
             ->setDefault('constraints', function (Options $options, $value) {
                 if (!empty($value)) {
                     return $value;
                 }
 
-                $this->validateConstantClass($class = $options['class']);
+                $class = $options['class'];
+                $method = $options['accessor'];
+                $this->validateCallback($class, $method);
 
                 return [
                     new Assert\Choice([
-                        'choices'  => call_user_func([$class, 'getConstants']),
+                        'choices'  => call_user_func([$class, $method]),
                         'multiple' => $options['multiple'],
                     ]),
                 ];
             })
-            ->setAllowedTypes('class', 'string');
+            ->setAllowedTypes('class', 'string')
+            ->setAllowedTypes('accessor', 'string');
     }
 
     /**
      * Validates the constant class.
      *
      * @param string $class
+     * @param string $method
      *
      * @throws InvalidOptionsException If the class does not exist or if it does not implement the
      *                                 {@link \Ekyna\Bundle\ResourceBundle\Model\ConstantsInterface}
+     * @throws InvalidOptionsException If the method does not exist in class, or is not static
      */
-    private function validateConstantClass($class)
+    private function validateCallback(string $class, string $method)
     {
         if (!class_exists($class)) {
             throw new InvalidOptionsException(sprintf("The class %s does not exists.", $class));
@@ -67,6 +75,13 @@ class ConstantChoiceType extends AbstractType
         if (!is_subclass_of($class, ConstantsInterface::class)) {
             throw new InvalidOptionsException(
                 sprintf("The class %s must implements %s", $class, ConstantsInterface::class)
+            );
+        }
+
+        $rc = new \ReflectionClass($class);
+        if (!($rc->hasMethod($method) && ($rm = $rc->getMethod($method)) && $rm->isStatic())) {
+            throw new InvalidOptionsException(
+                sprintf("Method %s does not exist in class %s, or is not static", $method, $class)
             );
         }
     }
