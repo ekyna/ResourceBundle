@@ -120,6 +120,12 @@
             <tag name="form.type"/>
         </service>
 
+        <!-- Table types -->
+        <service id="Ekyna\Bundle\ResourceBundle\Table\Filter\ResourceType">
+            <argument type="service" id="ekyna_resource.configuration_registry"/>
+            <tag name="table.filter_type"/>
+        </service>
+
         <!-- Serialization -->
         <service id="ekyna_resource.serializer.resource_normalizer"
                  class="Ekyna\Component\Resource\Serializer\AbstractResourceNormalizer"
