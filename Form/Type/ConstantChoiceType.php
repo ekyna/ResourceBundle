@@ -24,24 +24,34 @@ class ConstantChoiceType extends AbstractType
     {
         $resolver
             ->setRequired('class')
-            ->setDefault('accessor', 'getChoices')
+            ->setDefaults([
+                'accessor'    => 'getChoices',
+                'filter'      => [],
+                'filter_mode' => ConstantsInterface::FILTER_EXCLUDE,
+            ])
             ->setDefault('choices', function (Options $options, $value) {
                 if (!empty($value)) {
                     return $value;
                 }
 
-                $class = $options['class'];
+                $class  = $options['class'];
                 $method = $options['accessor'];
                 $this->validateCallback($class, $method);
 
-                return call_user_func([$class, $method]);
+                $parameters = [];
+                if ($method === 'getChoices') {
+                    $parameters[] = $options['filter'];
+                    $parameters[] = $options['filter_mode'];
+                }
+
+                return call_user_func([$class, $method], ...$parameters);
             })
             ->setDefault('constraints', function (Options $options, $value) {
                 if (!empty($value)) {
                     return $value;
                 }
 
-                $class = $options['class'];
+                $class  = $options['class'];
                 $method = $options['accessor'];
                 $this->validateCallback($class, $method);
 

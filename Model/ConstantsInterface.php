@@ -49,9 +49,9 @@ interface ConstantsInterface
     /**
      * Returns the default constant choice.
      *
-     * @return string
+     * @return string|null
      */
-    public static function getDefaultChoice(): string;
+    public static function getDefaultChoice(): ?string;
 
     /**
      * Returns the label for the given constant.

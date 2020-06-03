@@ -54,9 +54,11 @@ abstract class AbstractConstants implements ConstantsInterface
     /**
      * @inheritdoc
      */
-    public static function getDefaultChoice(): string
+    public static function getDefaultChoice(): ?string
     {
-        if ($default = reset(static::getConstants())) {
+        $constants = static::getConstants();
+
+        if ($default = reset($constants)) {
             return $default;
         }
 
@@ -114,7 +116,7 @@ abstract class AbstractConstants implements ConstantsInterface
      *
      * @codeCoverageIgnore
      */
-    final private function __construct()
+    final protected function __construct()
     {
     }
 }
