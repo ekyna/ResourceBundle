@@ -142,6 +142,7 @@ class ConfigurationBuilder
      * Returns the options resolver.
      *
      * @return OptionsResolver
+     * @noinspection PhpUnusedParameterInspection
      */
     private function getOptionsResolver()
     {
@@ -206,7 +207,6 @@ class ConfigurationBuilder
         };
 
         $resolver = new OptionsResolver();
-        /** @noinspection PhpUnusedParameterInspection */
         $resolver
             ->setDefaults([
                 'entity'       => null,
@@ -467,14 +467,20 @@ class ConfigurationBuilder
                 $definition->setClass($repositoryClass);
             }
 
+            if (!$definition->hasTag('doctrine.repository_service')) {
+                $definition->addTag('doctrine.repository_service');
+            }
+
             return $definition;
         }
 
         $definition = new DI\Definition($repositoryClass);
-        $definition->setArguments([
-            new DI\Reference($managerId),
-            new DI\Reference($metadataId),
-        ]);
+        $definition
+            ->setArguments([
+                new DI\Reference($managerId),
+                new DI\Reference($metadataId),
+            ])
+            ->addTag('doctrine.repository_service');
 
         $this->container->setDefinition($id, $definition);
 

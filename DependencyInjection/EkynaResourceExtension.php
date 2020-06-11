@@ -11,7 +11,7 @@ use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 /**
  * Class EkynaResourceExtension
  * @package Ekyna\Bundle\ResourceBundle\DependencyInjection
- * @author Étienne Dauvergne <contact@ekyna.com>
+ * @author  Étienne Dauvergne <contact@ekyna.com>
  */
 class EkynaResourceExtension extends Extension
 {
@@ -21,7 +21,7 @@ class EkynaResourceExtension extends Extension
     public function load(array $configs, ContainerBuilder $container)
     {
         $configuration = new Configuration();
-        $config = $this->processConfiguration($configuration, $configs);
+        $config        = $this->processConfiguration($configuration, $configs);
 
         $loader = new Loader\XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load('services.xml');
@@ -58,7 +58,7 @@ class EkynaResourceExtension extends Extension
     /**
      * Configures the resources.
      *
-     * @param array $resources
+     * @param array            $resources
      * @param ContainerBuilder $container
      */
     private function configureResources(array $resources, ContainerBuilder $container)

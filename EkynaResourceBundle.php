@@ -29,5 +29,6 @@ class EkynaResourceBundle extends Bundle
 
         $container->addCompilerPass(new Compiler\ResourceRegistryPass());
         $container->addCompilerPass(new Compiler\SearchRepositoryPass());
+        $container->addCompilerPass(new Compiler\ExtendDoctrinePass());
     }
 }
