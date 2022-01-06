@@ -18,12 +18,7 @@ trait FormTrait
 {
     private FormFactoryInterface $formFactory;
 
-
     /**
-     * Sets the form factory.
-     *
-     * @param FormFactoryInterface $formFactory
-     *
      * @required
      */
     public function setFormFactory(FormFactoryInterface $formFactory): void

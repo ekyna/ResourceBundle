@@ -18,15 +18,16 @@ trait TemplatingTrait
 
 
     /**
-     * Sets the twig environment.
-     *
-     * @param Environment $twig
-     *
      * @required
      */
     public function setEnvironment(Environment $twig): void
     {
         $this->twig = $twig;
+    }
+
+    protected function getEnvironment(): Environment
+    {
+        return $this->twig;
     }
 
     /**
@@ -36,11 +37,9 @@ trait TemplatingTrait
      * @param array  $parameters An array of parameters to pass to the view
      *
      * @return string The rendered view
-     * @noinspection PhpDocMissingThrowsInspection
      */
     protected function renderView(string $view, array $parameters = []): string
     {
-        /** @noinspection PhpUnhandledExceptionInspection */
         return $this->twig->render($view, $parameters);
     }
 

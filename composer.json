@@ -21,6 +21,7 @@
         "ekyna/resource": "0.8.x-dev",
         "symfony/expression-language": "^5.0",
         "symfony/framework-bundle": "^5.0",
+        "symfony/proxy-manager-bridge": "^5.0",
         "symfony/mailer": "^5.0",
         "symfony/translation": "^5.0",
         "friendsofsymfony/elastica-bundle": "^6.0",

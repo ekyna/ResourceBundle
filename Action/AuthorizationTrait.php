@@ -19,17 +19,17 @@ trait AuthorizationTrait
 {
     private AuthorizationCheckerInterface $authorizationChecker;
 
-
     /**
-     * Sets the authorization checker.
-     *
-     * @param AuthorizationCheckerInterface $checker
-     *
      * @required
      */
     public function setAuthorizationChecker(AuthorizationCheckerInterface $checker): void
     {
         $this->authorizationChecker = $checker;
+    }
+
+    protected function getAuthorizationChecker(): AuthorizationCheckerInterface
+    {
+        return $this->authorizationChecker;
     }
 
     /**

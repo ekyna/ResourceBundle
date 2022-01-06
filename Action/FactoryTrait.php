@@ -23,12 +23,7 @@ trait FactoryTrait
 {
     private FactoryFactoryInterface $factoryFactory;
 
-
     /**
-     * Sets the factory factory.
-     *
-     * @param FactoryFactoryInterface $factory
-     *
      * @required
      */
     public function setFactoryFactory(FactoryFactoryInterface $factory): void
@@ -38,10 +33,6 @@ trait FactoryTrait
 
     /**
      * Returns the resource factory.
-     *
-     * @param string|null $class
-     *
-     * @return ResourceFactoryInterface
      */
     protected function getFactory(string $class = null): ResourceFactoryInterface
     {
@@ -62,8 +53,6 @@ trait FactoryTrait
 
     /**
      * Creates a new resource.
-     *
-     * @return ResourceInterface
      */
     protected function createResource(): ResourceInterface
     {

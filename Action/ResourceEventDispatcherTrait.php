@@ -16,20 +16,13 @@ trait ResourceEventDispatcherTrait
     private ResourceEventDispatcherInterface $resourceEventDispatcher;
 
     /**
-     * Sets the resource event dispatcher.
-     *
-     * @param ResourceEventDispatcherInterface $dispatcher
+     * @required
      */
     public function setResourceEventDispatcher(ResourceEventDispatcherInterface $dispatcher): void
     {
         $this->resourceEventDispatcher = $dispatcher;
     }
 
-    /**
-     * Returns the resource event dispatcher.
-     *
-     * @return ResourceEventDispatcherInterface
-     */
     protected function getResourceEventDispatcher(): ResourceEventDispatcherInterface
     {
         return $this->resourceEventDispatcher;

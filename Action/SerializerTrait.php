@@ -15,12 +15,7 @@ trait SerializerTrait
 {
     private Serializer $serializer;
 
-
     /**
-     * Sets the serializer.
-     *
-     * @param Serializer $serializer
-     *
      * @required
      */
     public function setSerializer(Serializer $serializer): void
@@ -28,11 +23,6 @@ trait SerializerTrait
         $this->serializer = $serializer;
     }
 
-    /**
-     * Returns the serializer.
-     *
-     * @return Serializer
-     */
     protected function getSerializer(): Serializer
     {
         return $this->serializer;

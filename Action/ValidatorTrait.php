@@ -16,20 +16,13 @@ trait ValidatorTrait
     private Validator\Validator\ValidatorInterface $validator;
 
     /**
-     * Sets the validator.
-     *
-     * @param Validator\Validator\ValidatorInterface $validator
+     * @required
      */
     public function setValidator(Validator\Validator\ValidatorInterface $validator): void
     {
         $this->validator = $validator;
     }
 
-    /**
-     * Returns the validator.
-     *
-     * @return Validator\Validator\ValidatorInterface
-     */
     protected function getValidator(): Validator\Validator\ValidatorInterface
     {
         return $this->validator;

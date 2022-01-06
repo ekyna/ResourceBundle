@@ -18,15 +18,16 @@ trait UrlGeneratorTrait
 
 
     /**
-     * Sets the url generator.
-     *
-     * @param UrlGeneratorInterface $urlGenerator
-     *
      * @required
      */
     public function setUrlGenerator(UrlGeneratorInterface $urlGenerator): void
     {
         $this->urlGenerator = $urlGenerator;
+    }
+
+    protected function getUrlGenerator(): UrlGeneratorInterface
+    {
+        return $this->urlGenerator;
     }
 
     /**

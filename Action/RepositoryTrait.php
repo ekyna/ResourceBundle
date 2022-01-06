@@ -21,12 +21,7 @@ trait RepositoryTrait
 {
     private RepositoryFactoryInterface $repositoryFactory;
 
-
     /**
-     * Sets the repository factory.
-     *
-     * @param RepositoryFactoryInterface $factory
-     *
      * @required
      */
     public function setRepositoryFactory(RepositoryFactoryInterface $factory): void
@@ -36,10 +31,6 @@ trait RepositoryTrait
 
     /**
      * Returns the repository for the given resource class.
-     *
-     * @param string|null $class
-     *
-     * @return ResourceRepositoryInterface
      */
     protected function getRepository(string $class = null): ResourceRepositoryInterface
     {

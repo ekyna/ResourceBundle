@@ -27,10 +27,7 @@ trait ManagerTrait
 {
     private ManagerFactoryInterface $managerFactory;
 
-
     /**
-     * Sets the manager factory.
-     *
      * @required
      */
     public function setManagerFactory(ManagerFactoryInterface $factory): void

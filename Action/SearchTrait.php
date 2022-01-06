@@ -21,12 +21,7 @@ trait SearchTrait
 {
     private SearchRepositoryFactoryInterface $searchRepositoryFactory;
 
-
     /**
-     * Sets the search repository factory.
-     *
-     * @param SearchRepositoryFactoryInterface $factory
-     *
      * @required
      */
     public function setSearchRepositoryFactory(SearchRepositoryFactoryInterface $factory): void
@@ -36,10 +31,6 @@ trait SearchTrait
 
     /**
      * Returns the search repository for the given resource class.
-     *
-     * @param string|null $class
-     *
-     * @return SearchRepositoryInterface
      */
     protected function getSearchRepository(string $class = null): SearchRepositoryInterface
     {

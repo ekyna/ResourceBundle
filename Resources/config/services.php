@@ -21,6 +21,8 @@ use Ekyna\Bundle\ResourceBundle\Service\Uploader\UploadToggler;
 use Ekyna\Bundle\ResourceBundle\Table\Column\DecimalColumnTypeExtension;
 use Ekyna\Bundle\ResourceBundle\Table\Filter\ResourceType;
 use Ekyna\Component\Resource\Bridge\Symfony\Serializer\ResourceNormalizer;
+use Ekyna\Component\Resource\Copier\Copier;
+use Ekyna\Component\Resource\Copier\CopierInterface;
 use Ekyna\Component\Resource\Helper\PdfGenerator;
 
 return static function (ContainerConfigurator $container) {
@@ -56,6 +58,10 @@ return static function (ContainerConfigurator $container) {
                 service('router'),
             ])
             ->tag('twig.runtime')
+
+        // Resource copier
+        ->set('ekyna_resource.copier', Copier::class)
+            ->alias(CopierInterface::class, 'ekyna_resource.copier')
 
         // Redirections
         ->set('ekyna_resource.redirection.provider_registry', ProviderRegistry::class)

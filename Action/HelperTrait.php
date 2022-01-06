@@ -18,12 +18,7 @@ trait HelperTrait
 {
     private ResourceHelper $resourceHelper;
 
-
     /**
-     * Sets the resourceHelper.
-     *
-     * @param ResourceHelper $resourceHelper
-     *
      * @required
      */
     public function setResourceHelper(ResourceHelper $resourceHelper): void
@@ -31,11 +26,11 @@ trait HelperTrait
         $this->resourceHelper = $resourceHelper;
     }
 
-    /**
-     * Returns the url generator.
-     *
-     * @return UrlGeneratorInterface
-     */
+    protected function getResourceHelper(): ResourceHelper
+    {
+        return $this->resourceHelper;
+    }
+
     protected function getUrlGenerator(): UrlGeneratorInterface
     {
         return $this->resourceHelper->getUrlGenerator();

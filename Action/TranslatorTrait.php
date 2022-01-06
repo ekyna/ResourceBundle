@@ -15,17 +15,17 @@ trait TranslatorTrait
 {
     private TranslatorInterface $translator;
 
-
     /**
-     * Sets the translator.
-     *
-     * @param TranslatorInterface $translator
-     *
      * @required
      */
     public function setTranslator(TranslatorInterface $translator): void
     {
         $this->translator = $translator;
+    }
+
+    protected function getTranslator(): TranslatorInterface
+    {
+        return $this->translator;
     }
 
     /**

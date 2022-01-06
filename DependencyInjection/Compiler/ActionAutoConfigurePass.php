@@ -14,14 +14,14 @@ use Ekyna\Component\Resource\Bridge\Symfony\DependencyInjection\Compiler\ActionA
  */
 class ActionAutoConfigurePass extends BasePass
 {
-    /**
-     * @inheritDoc
-     */
     protected function getAutoconfigureMap(): array
     {
         return [
             Action\AuthorizationTrait::class           => [
                 'setAuthorizationChecker' => 'security.authorization_checker',
+            ],
+            Action\CopierTrait::class                  => [
+                'setCopier' => 'ekyna_resource.copier',
             ],
             Action\FactoryTrait::class                 => [
                 'setFactoryFactory' => 'ekyna_resource.factory.factory',
