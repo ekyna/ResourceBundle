@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Ekyna\Bundle\ResourceBundle\Doctrine\Handler;
 
-use Doctrine\ORM\EntityManager;
 use Doctrine\Persistence\Mapping\ClassMetadata;
+use Doctrine\Persistence\ObjectManager;
 use Gedmo\Exception\InvalidMappingException;
 use Gedmo\Sluggable\Handler\SlugHandlerInterface;
 use Gedmo\Sluggable\Mapping\Event\SluggableAdapter;
@@ -20,70 +20,34 @@ use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
  */
 class TreeTranslationSlugHandler implements SlugHandlerInterface
 {
-    const SEPARATOR = '/';
+    public const SEPARATOR = '/';
 
-    /**
-     * @var EntityManager
-     */
-    protected $om;
+    protected SluggableListener $sluggable;
 
-    /**
-     * @var SluggableListener
-     */
-    protected $sluggable;
+    protected ObjectManager $om;
+    private string          $prefix;
+    private string          $suffix;
+    private bool            $isInsert = false;
+    private string          $parentSlug;
+    private string          $usedPathSeparator;
 
-    /**
-     * @var string
-     */
-    private $prefix;
-
-    /**
-     * @var string
-     */
-    private $suffix;
-
-    /**
-     * True if node is being inserted
-     *
-     * @var bool
-     */
-    private $isInsert = false;
-
-    /**
-     * Transliterated parent slug
-     *
-     * @var string
-     */
-    private $parentSlug;
-
-    /**
-     * Used path separator
-     *
-     * @var string
-     */
-    private $usedPathSeparator;
-
-
-    /**
-     * {@inheritDoc}
-     */
     public function __construct(SluggableListener $sluggable)
     {
         $this->sluggable = $sluggable;
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
-    public function onChangeDecision(SluggableAdapter $ea, array &$config, $object, &$slug, &$needToChangeSlug)
+    public function onChangeDecision(SluggableAdapter $ea, array &$config, $object, &$slug, &$needToChangeSlug): void
     {
         $this->om = $ea->getObjectManager();
         $this->isInsert = $this->om->getUnitOfWork()->isScheduledForInsert($object);
         $options = $config['handlers'][get_called_class()];
 
-        $this->usedPathSeparator = isset($options['separator']) ? $options['separator'] : self::SEPARATOR;
-        $this->prefix = isset($options['prefix']) ? $options['prefix'] : '';
-        $this->suffix = isset($options['suffix']) ? $options['suffix'] : '';
+        $this->usedPathSeparator = $options['separator'] ?? self::SEPARATOR;
+        $this->prefix = $options['prefix'] ?? '';
+        $this->suffix = $options['suffix'] ?? '';
 
         if (!$this->isInsert && !$needToChangeSlug) {
             $changeSet = $ea->getObjectChangeSet($this->om->getUnitOfWork(), $object);
@@ -103,9 +67,9 @@ class TreeTranslationSlugHandler implements SlugHandlerInterface
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
-    public function postSlugBuild(SluggableAdapter $ea, array &$config, $object, &$slug)
+    public function postSlugBuild(SluggableAdapter $ea, array &$config, $object, &$slug): void
     {
         $options = $config['handlers'][get_called_class()];
         $this->parentSlug = '';
@@ -117,7 +81,6 @@ class TreeTranslationSlugHandler implements SlugHandlerInterface
 
         $wrapped = AbstractWrapper::wrap($relation, $this->om);
         if ($parent = $wrapped->getPropertyValue($options['relationParentRelationField'])) {
-
             if (isset($options['parentSkipExpression']) && !empty($expression = $options['parentSkipExpression'])) {
                 $language = new ExpressionLanguage();
                 if ($language->evaluate($expression, ['parent' => $parent])) {
@@ -130,7 +93,7 @@ class TreeTranslationSlugHandler implements SlugHandlerInterface
             $this->parentSlug = $translation->{$options['parentFieldMethod']}();
 
             // if needed, remove suffix from parentSlug, so we can use it to prepend it to our slug
-            if (isset($options['suffix'])) {
+            if (isset($options['suffix']) && !empty($options['suffix'])) {
                 $suffix = $options['suffix'];
 
                 if (substr($this->parentSlug, -strlen($suffix)) === $suffix) { //endsWith
@@ -141,14 +104,14 @@ class TreeTranslationSlugHandler implements SlugHandlerInterface
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
-    public static function validate(array $options, ClassMetadata $meta)
+    public static function validate(array $options, ClassMetadata $meta): void
     {
         if (!$meta->isSingleValuedAssociation($options['relationField'])) {
             throw new InvalidMappingException(
                 'Unable to find tree parent slug relation through field - ' .
-                "[{$options['relationParentRelationField']}] in class - {$meta->name}"
+                "[{$options['relationParentRelationField']}] in class - $meta->name"
             );
         }
 //      TODO Check parent relation in translatable entity is single valued
@@ -156,67 +119,59 @@ class TreeTranslationSlugHandler implements SlugHandlerInterface
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
-    public function onSlugCompletion(SluggableAdapter $ea, array &$config, $object, &$slug)
+    public function onSlugCompletion(SluggableAdapter $ea, array &$config, $object, &$slug): void
     {
-        $slug = $this->transliterate($slug, $config['separator'], $object);
+        $slug = $this->transliterate($slug);
 
-        if (!$this->isInsert) {
-            $config['pathSeparator'] = $this->usedPathSeparator;
+        if ($this->isInsert) {
+            return;
+        }
 
-            $wrapped = AbstractWrapper::wrap($object, $this->om);
-            $meta = $wrapped->getMetadata();
+        $config['pathSeparator'] = $this->usedPathSeparator;
 
-            // Overwrite original data
-            $uow = $this->om->getUnitOfWork();
-            $changeSet = $uow->getEntityChangeSet($object);
-            $oldSlug = isset($changeSet[$config['slug']])
-                ? $changeSet[$config['slug']][0]
-                : $meta->getReflectionProperty($config['slug'])->getValue($object);
-            $oid = spl_object_hash($object);
-            $ea->setOriginalObjectProperty($uow, $oid, $config['slug'], $oldSlug);
+        $wrapped = AbstractWrapper::wrap($object, $this->om);
+        $meta = $wrapped->getMetadata();
 
-            // Translatable children paths replacement
-            if (!(isset($config['replaceChildren']) && $config['replaceChildren'])) {
-                return;
+        // Overwrite original data
+        $uow = $this->om->getUnitOfWork();
+        $changeSet = $uow->getEntityChangeSet($object);
+        $oldSlug = isset($changeSet[$config['slug']])
+            ? $changeSet[$config['slug']][0]
+            : $meta->getReflectionProperty($config['slug'])->getValue($object);
+        $ea->setOriginalObjectProperty($uow, $object, $config['slug'], $oldSlug);
+
+        // Translatable children paths replacement
+        if (!(isset($config['replaceChildren']) && $config['replaceChildren'])) {
+            return;
+        }
+
+        $ea->replaceRelative($object, $config, $oldSlug . $config['pathSeparator'], $slug);
+
+        // Update in memory objects
+        foreach ($uow->getIdentityMap() as $className => $objects) {
+            // for inheritance mapped classes, only root is always in the identity map
+            if ($className !== $wrapped->getRootObjectName()) {
+                continue;
             }
 
-            $ea->replaceRelative($object, $config, $oldSlug . $config['pathSeparator'], $slug);
-
-            // Update in memory objects
-            foreach ($uow->getIdentityMap() as $className => $objects) {
-                // for inheritance mapped classes, only root is always in the identity map
-                if ($className !== $wrapped->getRootObjectName()) {
+            foreach ($objects as $object) {
+                if (property_exists($object, '__isInitialized__') && !$object->__isInitialized__) {
                     continue;
                 }
-                foreach ($objects as $object) {
-                    if (property_exists($object, '__isInitialized__') && !$object->__isInitialized__) {
-                        continue;
-                    }
-                    $oid = spl_object_hash($object);
-                    $objectSlug = $meta->getReflectionProperty($config['slug'])->getValue($object);
-                    if (preg_match("@^{$oldSlug}{$config['pathSeparator']}@smi", $objectSlug)) {
-                        $objectSlug = str_replace($oldSlug, $slug, $objectSlug);
-                        $meta->getReflectionProperty($config['slug'])->setValue($object, $objectSlug);
-                        $ea->setOriginalObjectProperty($uow, $oid, $config['slug'], $objectSlug);
-                    }
+
+                $objectSlug = $meta->getReflectionProperty($config['slug'])->getValue($object);
+                if (preg_match("@^{$oldSlug}{$config['pathSeparator']}@smi", $objectSlug)) {
+                    $objectSlug = str_replace($oldSlug, $slug, $objectSlug);
+                    $meta->getReflectionProperty($config['slug'])->setValue($object, $objectSlug);
+                    $ea->setOriginalObjectProperty($uow, $object, $config['slug'], $objectSlug);
                 }
             }
         }
     }
 
-    /**
-     * Transliterates the slug and prefixes the slug
-     * by collection of parent slugs
-     *
-     * @param string $text
-     * @param string $separator
-     * @param object $object
-     *
-     * @return string
-     */
-    public function transliterate($text, $separator, $object)
+    private function transliterate(string $text): string
     {
         $slug = $text . $this->suffix;
 
@@ -230,10 +185,7 @@ class TreeTranslationSlugHandler implements SlugHandlerInterface
         return $slug;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function handlesUrlization()
+    public function handlesUrlization(): bool
     {
         return false;
     }

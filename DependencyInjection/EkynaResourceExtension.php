@@ -18,6 +18,7 @@ use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 
 use function array_diff;
 use function array_keys;
+use function array_unique;
 use function array_unshift;
 use function array_values;
 use function dirname;
@@ -120,7 +121,7 @@ class EkynaResourceExtension extends Extension implements PrependExtensionInterf
         }
 
         $default = $config['locale'];
-        $locales = $config['locales'];
+        $locales = array_unique($config['locales']);
         $hosts = $config['hosts'];
 
         if (!in_array($default, $locales, true)) {
