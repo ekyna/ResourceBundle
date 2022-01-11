@@ -14,7 +14,7 @@ define(['jquery', 'select2'], function($) {
         }, config);
 
         this.each(function() {
-            let $this = $(this)
+            var $this = $(this),
                 config = $.extend({}, defaults, $this.data('config'));
 
             $this.select2({
