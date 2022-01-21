@@ -79,7 +79,7 @@ class Configuration implements ConfigurationInterface
                     ->children()
                         ->scalarNode('email')
                             ->cannotBeEmpty()
-                            ->defaultValue('support@ekyan.com')
+                            ->defaultValue('support@ekyna.com')
                         ->end()
                     ->end()
                 ->end()
