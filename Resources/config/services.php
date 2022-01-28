@@ -24,6 +24,7 @@ use Ekyna\Component\Resource\Bridge\Symfony\Serializer\ResourceNormalizer;
 use Ekyna\Component\Resource\Copier\Copier;
 use Ekyna\Component\Resource\Copier\CopierInterface;
 use Ekyna\Component\Resource\Helper\PdfGenerator;
+use Symfony\Component\HttpKernel\KernelEvents;
 
 return static function (ContainerConfigurator $container) {
     $container
@@ -85,6 +86,7 @@ return static function (ContainerConfigurator $container) {
                 param('kernel.debug'),
             ])
             ->tag('kernel.event_listener', [
+                'event'    => KernelEvents::EXCEPTION,
                 'priority' => 2, // Just before \Symfony\Component\Security\Http\Firewall\ExceptionListener::onKernelException
             ])
 

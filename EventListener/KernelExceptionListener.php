@@ -13,9 +13,8 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
-use Symfony\Component\HttpKernel\Exception\HttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\Component\HttpKernel\Exception as Http;
+use Symfony\Component\Security\Core\Exception as Security;
 use Symfony\Component\Security\Http\HttpUtils;
 
 use function is_string;
@@ -30,17 +29,16 @@ class KernelExceptionListener
 {
     private ProviderRegistryInterface $registry;
     private HttpUtils                 $utils;
-    private ErrorReporter $errorReporter;
-    private RequestStack  $requestStack;
-    private bool          $debug;
-
+    private ErrorReporter             $errorReporter;
+    private RequestStack              $requestStack;
+    private bool                      $debug;
 
     public function __construct(
         ProviderRegistryInterface $registry,
-        HttpUtils $utils,
-        ErrorReporter $errorReporter,
-        RequestStack  $requestStack,
-        bool $debug
+        HttpUtils                 $utils,
+        ErrorReporter             $errorReporter,
+        RequestStack              $requestStack,
+        bool                      $debug
     ) {
         $this->registry = $registry;
         $this->utils = $utils;
@@ -49,25 +47,12 @@ class KernelExceptionListener
         $this->debug = $debug;
     }
 
-    /**
-     * Kernel exception event handler.
-     *
-     * @param ExceptionEvent $event
-     */
     public function __invoke(ExceptionEvent $event): void
     {
         $exception = $event->getThrowable();
 
-        if ($exception instanceof NotFoundHttpException) {
+        if ($exception instanceof Http\NotFoundHttpException) {
             $this->handleNotFoundHttpException($event);
-
-            return;
-        }
-
-        if ($exception instanceof AccessDeniedException) {
-            if ($event->getRequest()->isXmlHttpRequest()) {
-                $event->setResponse(new Response('', Response::HTTP_FORBIDDEN));
-            }
 
             return;
         }
@@ -78,8 +63,25 @@ class KernelExceptionListener
             return;
         }
 
-        if ($exception instanceof HttpException) {
-            // Don't send log about others http exceptions.
+        if ($exception instanceof Security\AccessDeniedException) {
+            if ($event->getRequest()->isXmlHttpRequest()) {
+                $event->setResponse(new Response('', Response::HTTP_FORBIDDEN));
+            }
+
+            return;
+        }
+
+        // Don't report these security exceptions
+        if (
+            $exception instanceof Security\LazyResponseException
+            || $exception instanceof Security\AuthenticationException
+            || $exception instanceof Security\LogoutException
+        ) {
+            return;
+        }
+
+        // Don't report others http exceptions.
+        if ($exception instanceof Http\HttpException) {
             return;
         }
 
@@ -151,7 +153,6 @@ class KernelExceptionListener
         try {
             $this->requestStack->getSession()->getFlashBag()->add($exception->getMessageType(), $message);
         } catch (SessionNotFoundException $exception) {
-
         }
     }
 }
