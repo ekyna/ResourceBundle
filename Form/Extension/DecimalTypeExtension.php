@@ -10,6 +10,7 @@ use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\MoneyType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
@@ -31,7 +32,12 @@ class DecimalTypeExtension extends AbstractTypeExtension
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver
-            ->setDefault('decimal', false)
+            ->setDefaults([
+                'decimal'    => false,
+                'empty_data' => function (Options $options) {
+                    return $options['required'] && $options['decimal'] ? '0' : null;
+                },
+            ])
             ->setAllowedTypes('decimal', 'bool');
     }
 
