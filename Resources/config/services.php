@@ -24,6 +24,7 @@ use Ekyna\Component\Resource\Bridge\Symfony\Serializer\ResourceNormalizer;
 use Ekyna\Component\Resource\Copier\Copier;
 use Ekyna\Component\Resource\Copier\CopierInterface;
 use Ekyna\Component\Resource\Helper\PdfGenerator;
+use Ekyna\Component\Resource\Import\CsvImporter;
 use Symfony\Component\HttpKernel\KernelEvents;
 
 return static function (ContainerConfigurator $container) {
@@ -63,6 +64,17 @@ return static function (ContainerConfigurator $container) {
         // Resource copier
         ->set('ekyna_resource.copier', Copier::class)
             ->alias(CopierInterface::class, 'ekyna_resource.copier')
+
+        // Resource CSV importer
+        ->set('ekyna_resource.importer.csv', CsvImporter::class)
+            ->args([
+                service('ekyna_resource.factory.factory'),
+                service('ekyna_resource.repository.factory'),
+                service('validator'),
+                service('doctrine.orm.default_entity_manager'),
+            ])
+            ->tag('kernel.event_listener', ['event' => 'kernel.terminate', 'method' => 'flush'])
+            ->alias(CsvImporter::class, 'ekyna_resource.importer.csv')
 
         // Redirections
         ->set('ekyna_resource.redirection.provider_registry', ProviderRegistry::class)

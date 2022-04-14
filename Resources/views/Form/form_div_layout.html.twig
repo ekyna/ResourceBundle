@@ -8,6 +8,34 @@
 {% endapply %}
 {% endblock ekyna_resource_widget %}
 
+{% block ekyna_resource_import_config_widget %}
+{% apply spaceless %}
+    {{ form_row(form.file) }}
+    <div class="row">
+        <div class="col-md-6">
+            {{ form_row(form.from, {'label_col': 4, 'widget_col': 8}) }}
+        </div>
+        <div class="col-md-6">
+            {{ form_row(form.to, {'label_col': 4, 'widget_col': 8}) }}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            {{ form_row(form.separator, {'label_col': 4, 'widget_col': 8}) }}
+        </div>
+        <div class="col-md-6">
+            {{ form_row(form.enclosure, {'label_col': 4, 'widget_col': 8}) }}
+        </div>
+    </div>
+    {% for consumer in form.consumers.children %}
+        <hr>
+        {{ form_row(consumer) }}
+        {{ form_rest(consumer) }}
+    {% endfor %}
+    {{ form_rest(form) }}
+{% endapply %}
+{% endblock ekyna_resource_import_config_widget %}
+
 
 {% block ekyna_resource_widget_collapsed %}
 {% apply spaceless %}
