@@ -17,6 +17,8 @@ use Symfony\Component\HttpKernel\Exception as Http;
 use Symfony\Component\Security\Core\Exception as Security;
 use Symfony\Component\Security\Http\HttpUtils;
 
+use Twig\Error\RuntimeError;
+
 use function is_string;
 use function preg_match;
 
@@ -50,6 +52,16 @@ class KernelExceptionListener
     public function __invoke(ExceptionEvent $event): void
     {
         $exception = $event->getThrowable();
+
+        // Redirection exception thrown from twig template rendering
+        if ($exception instanceof RuntimeError) {
+            $previous = $exception->getPrevious();
+            if (!$previous instanceof RedirectException) {
+                return;
+            }
+            $exception = $previous;
+            $event->setThrowable($exception);
+        }
 
         if ($exception instanceof Http\NotFoundHttpException) {
             $this->handleNotFoundHttpException($event);

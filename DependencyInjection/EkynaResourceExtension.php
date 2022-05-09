@@ -56,7 +56,7 @@ class EkynaResourceExtension extends Extension implements PrependExtensionInterf
                     Type\EncryptedJsonType::NAME => [
                         'class' => Type\EncryptedJsonType::class,
                     ],
-                    Type\PhpDecimalType::NAME         => [
+                    Type\PhpDecimalType::NAME    => [
                         'class' => Type\PhpDecimalType::class,
                     ],
                 ],
@@ -138,12 +138,11 @@ class EkynaResourceExtension extends Extension implements PrependExtensionInterf
         $container->setParameter('ekyna_resource.hosts', $hosts);
 
         $framework = [
-            'trusted_hosts'  => array_values($hosts),
-            'default_locale' => $default,
-            // TODO 'trusted_hosts'  => array_values($hosts),
-            'translator'     => [
-                'enabled_locales' => $locales,
-                'fallbacks'       => [$default],
+            'trusted_hosts'   => array_values($hosts),
+            'default_locale'  => $default,
+            'enabled_locales' => $locales,
+            'translator'      => [
+                'fallbacks' => [$default],
             ],
         ];
 
