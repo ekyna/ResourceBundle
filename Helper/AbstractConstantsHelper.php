@@ -45,6 +45,6 @@ abstract class AbstractConstantsHelper
      */
     protected function renderBadge(string $label, string $theme = 'default'): string
     {
-        return sprintf('<span class="label label-%s product-type-badge">%s</span>', $theme, $label);
+        return sprintf('<span class="label label-%s">%s</span>', $theme, $label);
     }
 }

@@ -23,6 +23,9 @@ class ActionAutoConfigurePass extends BasePass
             Action\CopierTrait::class                  => [
                 'setCopier' => 'ekyna_resource.copier',
             ],
+            Action\EventDispatcherTrait::class         => [
+                'setEventDispatcher' => 'event_dispatcher',
+            ],
             Action\FactoryTrait::class                 => [
                 'setFactoryFactory' => 'ekyna_resource.factory.factory',
             ],

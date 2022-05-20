@@ -20,11 +20,14 @@ use Ekyna\Bundle\ResourceBundle\Service\Uploader\UploaderResolver;
 use Ekyna\Bundle\ResourceBundle\Service\Uploader\UploadToggler;
 use Ekyna\Bundle\ResourceBundle\Table\Column\DecimalColumnTypeExtension;
 use Ekyna\Bundle\ResourceBundle\Table\Filter\ResourceType;
+use Ekyna\Bundle\ResourceBundle\Twig\ResourceExtension;
 use Ekyna\Component\Resource\Bridge\Symfony\Serializer\ResourceNormalizer;
 use Ekyna\Component\Resource\Copier\Copier;
 use Ekyna\Component\Resource\Copier\CopierInterface;
 use Ekyna\Component\Resource\Helper\PdfGenerator;
 use Ekyna\Component\Resource\Import\CsvImporter;
+use Ekyna\Component\Resource\Message\MessageQueue;
+use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\HttpKernel\KernelEvents;
 
 return static function (ContainerConfigurator $container) {
@@ -178,6 +181,20 @@ return static function (ContainerConfigurator $container) {
             ->args([
                 abstract_arg('PDF generator endpoint'),
                 abstract_arg('PDF generator token'),
+            ])
+
+        // Message queue
+        ->set('ekyna_resource.queue.message', MessageQueue::class)
+            ->args([
+                service('messenger.default_bus')->nullOnInvalid(),
+            ])
+            ->tag('kernel.event_listener', [
+                'event'  => KernelEvents::TERMINATE,
+                'method' => 'flush',
+            ])
+            ->tag('kernel.event_listener', [
+                'event'  => ConsoleEvents::TERMINATE,
+                'method' => 'flush',
             ])
     ;
 };

@@ -27,7 +27,7 @@ use function sprintf;
 trait PrependBundleConfigTrait
 {
     /**
-     * Prepends the bundles configuration files.
+     * Prepends the bundle's configuration files.
      *
      * @param ContainerBuilder $container
      * @param string           $directory
@@ -94,7 +94,9 @@ trait PrependBundleConfigTrait
         $reflector = new ReflectionClass($this);
         $fileName = $reflector->getFileName();
 
-        $directory = realpath(dirname($fileName) . $directory);
+        if (!$directory = realpath($path = (dirname($fileName) . $directory))) {
+            throw new RuntimeException(sprintf('The configuration directory "%s" does not exists.', $path));
+        }
 
         if (!is_dir($directory)) {
             throw new RuntimeException(sprintf('The configuration directory "%s" does not exists.', $directory));
