@@ -12,7 +12,6 @@ use Ekyna\Bundle\ResourceBundle\EventListener\OneupUploadListener;
 use Ekyna\Bundle\ResourceBundle\EventListener\UploadableListener;
 use Ekyna\Bundle\ResourceBundle\Helper\ResourceHelper;
 use Ekyna\Bundle\ResourceBundle\Service\ContextFactory;
-use Ekyna\Bundle\ResourceBundle\Service\Error\ErrorReporter;
 use Ekyna\Bundle\ResourceBundle\Service\Http\TagManager;
 use Ekyna\Bundle\ResourceBundle\Service\Redirection\ProviderRegistry;
 use Ekyna\Bundle\ResourceBundle\Service\Routing\ResourceLoader;
@@ -20,7 +19,6 @@ use Ekyna\Bundle\ResourceBundle\Service\Uploader\UploaderResolver;
 use Ekyna\Bundle\ResourceBundle\Service\Uploader\UploadToggler;
 use Ekyna\Bundle\ResourceBundle\Table\Column\DecimalColumnTypeExtension;
 use Ekyna\Bundle\ResourceBundle\Table\Filter\ResourceType;
-use Ekyna\Bundle\ResourceBundle\Twig\ResourceExtension;
 use Ekyna\Component\Resource\Bridge\Symfony\Serializer\ResourceNormalizer;
 use Ekyna\Component\Resource\Copier\Copier;
 use Ekyna\Component\Resource\Copier\CopierInterface;
@@ -82,23 +80,12 @@ return static function (ContainerConfigurator $container) {
         // Redirections
         ->set('ekyna_resource.redirection.provider_registry', ProviderRegistry::class)
 
-        // Error reporter
-        ->set('ekyna_resource.reporter.error', ErrorReporter::class)
-            ->args([
-                service('security.token_storage'),
-                service('twig'),
-                service('mailer.mailer'),
-                param('ekyna_resource.report_email'),
-            ])
-
         // Kernel exception listener
         ->set('ekyna_resource.listener.kernel_exception', KernelExceptionListener::class)
             ->args([
                 service('ekyna_resource.redirection.provider_registry'),
                 service('security.http_utils'),
-                service('ekyna_resource.reporter.error'),
                 service('request_stack'),
-                param('kernel.debug'),
             ])
             ->tag('kernel.event_listener', [
                 'event'    => KernelEvents::EXCEPTION,

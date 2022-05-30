@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Ekyna\Bundle\ResourceBundle\EventListener;
 
 use Ekyna\Bundle\ResourceBundle\Exception\RedirectException;
-use Ekyna\Bundle\ResourceBundle\Service\Error\ErrorReporter;
 use Ekyna\Bundle\ResourceBundle\Service\Redirection\ProviderRegistryInterface;
 use Ekyna\Component\Resource\Exception\UnexpectedTypeException;
 use Symfony\Component\HttpFoundation\Exception\SessionNotFoundException;
@@ -16,7 +15,6 @@ use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Exception as Http;
 use Symfony\Component\Security\Core\Exception as Security;
 use Symfony\Component\Security\Http\HttpUtils;
-
 use Twig\Error\RuntimeError;
 
 use function is_string;
@@ -31,22 +29,16 @@ class KernelExceptionListener
 {
     private ProviderRegistryInterface $registry;
     private HttpUtils                 $utils;
-    private ErrorReporter             $errorReporter;
     private RequestStack              $requestStack;
-    private bool                      $debug;
 
     public function __construct(
         ProviderRegistryInterface $registry,
         HttpUtils                 $utils,
-        ErrorReporter             $errorReporter,
-        RequestStack              $requestStack,
-        bool                      $debug
+        RequestStack              $requestStack
     ) {
         $this->registry = $registry;
         $this->utils = $utils;
-        $this->errorReporter = $errorReporter;
         $this->requestStack = $requestStack;
-        $this->debug = $debug;
     }
 
     public function __invoke(ExceptionEvent $event): void
@@ -75,33 +67,13 @@ class KernelExceptionListener
             return;
         }
 
-        if ($exception instanceof Security\AccessDeniedException) {
-            if ($event->getRequest()->isXmlHttpRequest()) {
-                $event->setResponse(new Response('', Response::HTTP_FORBIDDEN));
-            }
-
+        if (!$exception instanceof Security\AccessDeniedException) {
             return;
         }
 
-        // Don't report these security exceptions
-        if (
-            $exception instanceof Security\LazyResponseException
-            || $exception instanceof Security\AuthenticationException
-            || $exception instanceof Security\LogoutException
-        ) {
-            return;
+        if ($event->getRequest()->isXmlHttpRequest()) {
+            $event->setResponse(new Response('', Response::HTTP_FORBIDDEN));
         }
-
-        // Don't report others http exceptions.
-        if ($exception instanceof Http\HttpException) {
-            return;
-        }
-
-        if ($this->debug) {
-            return;
-        }
-
-        $this->errorReporter->report($exception, $event->getRequest());
     }
 
     private function handleNotFoundHttpException(ExceptionEvent $event): void
