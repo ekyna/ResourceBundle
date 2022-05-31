@@ -13,6 +13,7 @@ use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\Loader\DelegatingLoader;
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\Config\Loader\LoaderResolver;
+use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
@@ -41,6 +42,10 @@ class EkynaResourceBundle extends Bundle
         if ($container->getParameter('kernel.debug')) {
             $container->addObjectResource($builder);
         }
+
+        // Before symfony's register listener pass
+        /** @see \Symfony\Component\EventDispatcher\DependencyInjection\RegisterListenersPass */
+        $container->addCompilerPass(new Compiler\MessengerPass(), PassConfig::TYPE_BEFORE_REMOVING, 1);
 
         $container->addCompilerPass(new Compiler\ActionAutoConfigurePass());
         $container->addCompilerPass(new Compiler\RouterHostsPass());
