@@ -1,3 +1,4 @@
+/** TODO Move to UiBundle ? */
 define(['jquery', 'select2'], function($) {
     "use strict";
 

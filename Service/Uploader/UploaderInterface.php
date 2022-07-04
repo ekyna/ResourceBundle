@@ -8,7 +8,7 @@ use Ekyna\Component\Resource\Model\UploadableInterface;
 
 /**
  * Interface UploaderInterface
- * @package Ekyna\Bundle\CoreBundle\Uploader
+ * @package Ekyna\Bundle\ResourceBundle\Uploader
  * @author  Étienne Dauvergne <contact@ekyna.com>
  */
 interface UploaderInterface

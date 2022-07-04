@@ -11,7 +11,7 @@ use Ekyna\Component\Resource\Model\UploadableInterface;
 
 /**
  * Class UploadableListener
- * @package Ekyna\Bundle\CoreBundle\Listener
+ * @package Ekyna\Bundle\ResourceBundle\Listener
  * @author  Étienne Dauvergne <contact@ekyna.com>
  */
 class UploadableListener

@@ -138,17 +138,20 @@ class EkynaResourceExtension extends Extension implements PrependExtensionInterf
         $container->setParameter('ekyna_resource.hosts', $hosts);
 
         $framework = [
-            'trusted_hosts'   => array_values($hosts),
             'default_locale'  => $default,
             'enabled_locales' => $locales,
             'translator'      => [
-                'fallbacks' => [$default],
+                'enabled_locales' => $locales,
+                'fallbacks'       => [$default],
             ],
         ];
 
-        /*if (isset($hosts[$default])) {
-            $framework['router']['default_uri'] = $hosts[$default];
-        }*/
+        if (!empty($hosts)) {
+            $framework['trusted_hosts'] = array_values($hosts);
+            if (isset($hosts[$default])) {
+                $framework['router']['default_uri'] = 'https://' . $hosts[$default];
+            }
+        }
 
         $container->prependExtensionConfig('framework', $framework);
     }

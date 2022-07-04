@@ -7,6 +7,8 @@ namespace Ekyna\Bundle\ResourceBundle\Helper;
 use Symfony\Contracts\Translation\TranslatableInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
+use function array_merge;
+use function implode;
 use function Symfony\Component\Translation\t;
 
 /**
@@ -43,8 +45,10 @@ abstract class AbstractConstantsHelper
     /**
      * Renders the constant badge.
      */
-    protected function renderBadge(string $label, string $theme = 'default'): string
+    protected function renderBadge(string $label, string $theme = 'default', array $classes = []): string
     {
-        return sprintf('<span class="label label-%s">%s</span>', $theme, $label);
+        $classes = array_merge(['label', 'label-' . $theme], $classes);
+
+        return sprintf('<span class="%s">%s</span>', implode(' ', $classes), $label);
     }
 }

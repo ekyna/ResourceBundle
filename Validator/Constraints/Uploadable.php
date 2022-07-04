@@ -8,7 +8,7 @@ use Symfony\Component\Validator\Constraint;
 
 /**
  * Class Uploadable
- * @package Ekyna\Bundle\CoreBundle\Validator\Constraints
+ * @package Ekyna\Bundle\ResourceBundle\Validator\Constraints
  * @author Étienne Dauvergne <contact@ekyna.com>
  */
 class Uploadable extends Constraint

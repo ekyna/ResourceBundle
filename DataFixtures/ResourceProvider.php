@@ -10,6 +10,7 @@ use Ekyna\Component\Resource\Model\ResourceInterface;
 use Ekyna\Component\Resource\Repository\RepositoryFactoryInterface;
 use Symfony\Component\Yaml\Yaml;
 
+use function is_string;
 use function sprintf;
 use function str_replace;
 
@@ -37,6 +38,10 @@ class ResourceProvider
         $parameters = Yaml::parse($criteria);
 
         foreach ($parameters as &$value) {
+            if (!is_string($value)) {
+                continue;
+            }
+
             $value = str_replace('\\', '', $value);
         }
 

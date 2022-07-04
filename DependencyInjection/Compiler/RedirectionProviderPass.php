@@ -10,7 +10,7 @@ use Symfony\Component\DependencyInjection\Reference;
 
 /**
  * Class RedirectionProviderPass
- * @package Ekyna\Bundle\CoreBundle\DependencyInjection\Compiler
+ * @package Ekyna\Bundle\ResourceBundle\DependencyInjection\Compiler
  * @author Étienne Dauvergne <contact@ekyna.com>
  */
 class RedirectionProviderPass implements CompilerPassInterface

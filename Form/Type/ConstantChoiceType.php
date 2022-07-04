@@ -16,7 +16,7 @@ use function call_user_func;
 
 /**
  * Class ConstantChoiceType
- * @package Ekyna\Bundle\CoreBundle\Form\Type
+ * @package Ekyna\Bundle\ResourceBundle\Form\Type
  * @author  Etienne Dauvergne <contact@ekyna.com>
  */
 class ConstantChoiceType extends AbstractType

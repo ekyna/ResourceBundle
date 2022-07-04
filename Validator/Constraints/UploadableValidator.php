@@ -11,7 +11,7 @@ use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 
 /**
  * Class UploadableValidator
- * @package Ekyna\Bundle\CoreBundle\Validator\Constraints
+ * @package Ekyna\Bundle\ResourceBundle\Validator\Constraints
  * @author  Étienne Dauvergne <contact@ekyna.com>
  */
 class UploadableValidator extends ConstraintValidator

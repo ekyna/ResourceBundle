@@ -78,10 +78,8 @@ final class ResourceHelper
 
     /**
      * Returns the configuration for the resource.
-     *
-     * @param ResourceInterface|string $resource
      */
-    public function getResourceConfig($resource): ResourceConfig
+    public function getResourceConfig(ResourceInterface|string $resource): ResourceConfig
     {
         return $this->resourceRegistry->find($resource);
     }
@@ -101,11 +99,9 @@ final class ResourceHelper
 
     /**
      * Generates an admin path for the given resource and action.
-     *
-     * @param string|ResourceInterface $resource
      */
     public function generateResourcePath(
-        $resource,
+        string|ResourceInterface $resource,
         string $action,
         array $parameters = [],
         bool $absolute = false
@@ -206,10 +202,8 @@ final class ResourceHelper
 
     /**
      * Returns the route name for the given resource and action.
-     *
-     * @param string|ResourceInterface $resource
      */
-    public function getRoute($resource, string $action): string
+    public function getRoute(ResourceInterface|string $resource, string $action): string
     {
         $aCfg = $this->actionRegistry->find($action);
 
@@ -309,7 +303,7 @@ final class ResourceHelper
         // By action context
         // TODO Only for create actions ?
         $context = $this->contextFactory->getContext($parentConfig);
-        if ($context && $parent = $context->getResource()) {
+        if ($parent = $context->getResource()) {
             return $parent;
         }
 

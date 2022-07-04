@@ -9,7 +9,7 @@ use Ekyna\Component\Resource\Exception\RuntimeException;
 
 /**
  * Class ProviderRegistry
- * @package Ekyna\Bundle\CoreBundle\Redirection
+ * @package Ekyna\Bundle\ResourceBundle\Redirection
  * @author  Étienne Dauvergne <contact@ekyna.com>
  */
 class ProviderRegistry implements ProviderRegistryInterface

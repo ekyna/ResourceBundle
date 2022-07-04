@@ -8,7 +8,7 @@ use Exception;
 
 /**
  * Class UploadException
- * @package Ekyna\Bundle\CoreBundle\Exception
+ * @package Ekyna\Bundle\ResourceBundle\Exception
  * @author Étienne Dauvergne <contact@ekyna.com>
  */
 class UploadException extends Exception

@@ -37,11 +37,8 @@ trait ManagerTrait
 
     /**
      * Returns the resource manager.
-     *
-     * @param ResourceInterface|string|null $resourceOrClass
-     * @TODO PHP8
      */
-    protected function getManager($resourceOrClass = null): ResourceManagerInterface
+    protected function getManager(ResourceInterface|string|null $resourceOrClass = null): ResourceManagerInterface
     {
         if (is_object($resourceOrClass)) {
             $resourceOrClass = get_class($resourceOrClass);

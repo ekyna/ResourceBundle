@@ -38,12 +38,8 @@ class ContextFactory
 
     /**
      * Returns the context for the given resource.
-     *
-     * @param ResourceConfig|string $config
-     *
-     * @return Context
      */
-    public function getContext($config): Context
+    public function getContext(ResourceConfig|string $config): Context
     {
         if (is_string($config)) {
             $config = $this->resourceRegistry->find($config);

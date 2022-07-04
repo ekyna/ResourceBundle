@@ -45,7 +45,7 @@ class AceSubjectBehavior extends AbstractBehavior implements PersistenceAwareInt
             return;
         }
 
-        $this->getPersistenceHelper()->persistAndRecompute($resource, false);
+        $this->persistenceHelper->persistAndRecompute($resource, false);
     }
 
     /**

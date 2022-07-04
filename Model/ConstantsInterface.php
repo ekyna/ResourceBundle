@@ -8,7 +8,7 @@ use Symfony\Contracts\Translation\TranslatableInterface;
 
 /**
  * Interface ConstantsInterface
- * @package Ekyna\Bundle\CoreBundle\Model
+ * @package Ekyna\Bundle\ResourceBundle\Model
  * @author  Étienne Dauvergne <contact@ekyna.com>
  */
 interface ConstantsInterface

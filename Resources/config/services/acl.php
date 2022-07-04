@@ -53,7 +53,7 @@ return static function (ContainerConfigurator $container) {
                 service('ekyna_resource.acl.id_generator'),
             ])
             ->tag('ekyna_resource.behavior')
-        ->alias(AceSubjectBehavior::class, 'ekyna_resource.behavior.ace_subject')
+            ->alias(AceSubjectBehavior::class, 'ekyna_resource.behavior.ace_subject')
 
         // ACL generate subject id command
         ->set('ekyna_resource.command.acl_generate_subject_id', AclGenerateSubjectIdCommand::class)

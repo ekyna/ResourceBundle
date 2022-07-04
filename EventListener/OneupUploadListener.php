@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\File\File;
 
 /**
  * Class OneupUploadListener
- * @package Ekyna\Bundle\CoreBundle\EventListener
+ * @package Ekyna\Bundle\ResourceBundle\EventListener
  * @author  Étienne Dauvergne <contact@ekyna.com>
  */
 class OneupUploadListener implements EventSubscriberInterface
