@@ -33,17 +33,14 @@ use function md5;
  */
 class FilesystemHelper
 {
-    private Filesystem $filesystem;
-    private int        $streamThreshold;
-
     private ?PathNormalizer    $pathNormalizer = null;
     private ?FilesystemAdapter $adapter        = null;
     private ?PathPrefixer      $pathPrefixer   = null;
 
-    public function __construct(Filesystem $filesystem, int $streamThreshold = 1014 * 1024)
-    {
-        $this->filesystem = $filesystem;
-        $this->streamThreshold = $streamThreshold;
+    public function __construct(
+        private readonly Filesystem $filesystem,
+        private readonly int        $streamThreshold = 1014 * 1024
+    ) {
     }
 
     /**
@@ -156,7 +153,7 @@ class FilesystemHelper
         $lastModified = $this->filesystem->lastModified($path);
 
         $response->setEtag(md5("$path-$lastModified"));
-        $response->setLastModified(DateTime::createFromFormat('U', $lastModified));
+        $response->setLastModified((new DateTime())->setTimestamp($lastModified));
         $response->setPublic();
 
         if ($request && $response->isNotModified($request)) {
@@ -182,7 +179,7 @@ class FilesystemHelper
             $rProperty->setAccessible(true);
 
             return $this->pathNormalizer = $rProperty->getValue($this->filesystem);
-        } catch (Throwable $exception) {
+        } catch (Throwable) {
         }
 
         throw new UnableToReadFile('Failed to retrieve path normalizer.');
@@ -200,7 +197,7 @@ class FilesystemHelper
             $rProperty->setAccessible(true);
 
             return $this->adapter = $rProperty->getValue($this->filesystem);
-        } catch (Throwable $exception) {
+        } catch (Throwable) {
         }
 
         throw new UnableToReadFile('Failed to retrieve adapter.');
@@ -220,7 +217,7 @@ class FilesystemHelper
             $rProperty->setAccessible(true);
 
             return $this->pathPrefixer = $rProperty->getValue($adapter);
-        } catch (ReflectionException $exception) {
+        } catch (ReflectionException) {
         }
 
         throw new UnableToReadFile('Failed to retrieve path prefixer.');

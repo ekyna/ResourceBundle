@@ -33,20 +33,10 @@ use const PATHINFO_DIRNAME;
  */
 class Uploader implements UploaderInterface
 {
-    protected FilesystemOperator $sourceFilesystem;
-    protected FilesystemOperator $targetFileSystem;
-
-
-    /**
-     * Constructor.
-     *
-     * @param FilesystemOperator $sourceFilesystem
-     * @param FilesystemOperator $targetFilesystem
-     */
-    public function __construct(FilesystemOperator $sourceFilesystem, FilesystemOperator $targetFilesystem)
-    {
-        $this->sourceFilesystem = $sourceFilesystem;
-        $this->targetFileSystem = $targetFilesystem;
+    public function __construct(
+        protected readonly FilesystemOperator $sourceFileSystem,
+        protected readonly FilesystemOperator $targetFileSystem
+    ) {
     }
 
     /**
@@ -81,7 +71,7 @@ class Uploader implements UploaderInterface
             $sourceKey = $uploadable->getKey();
 
             try {
-                if (!$this->sourceFilesystem->fileExists($sourceKey)) {
+                if (!$this->sourceFileSystem->fileExists($sourceKey)) {
                     throw new UploadException(sprintf('Source file "%s" does not exists.', $sourceKey));
                 }
             } catch (FilesystemException $exception) {
@@ -89,7 +79,7 @@ class Uploader implements UploaderInterface
             }
 
             try {
-                $size = $this->sourceFilesystem->fileSize($sourceKey);
+                $size = $this->sourceFileSystem->fileSize($sourceKey);
             } catch (FilesystemException $exception) {
                 throw new UploadException(
                     sprintf('Failed to get size of file "%s".', $sourceKey),
@@ -146,7 +136,7 @@ class Uploader implements UploaderInterface
             $sourceKey = $uploadable->getKey();
 
             try {
-                $stream = $this->sourceFilesystem->readStream($sourceKey);
+                $stream = $this->sourceFileSystem->readStream($sourceKey);
             } catch (FilesystemException $exception) {
                 throw new UploadException(
                     sprintf('Failed to open file "%s".', $sourceKey),
@@ -168,11 +158,11 @@ class Uploader implements UploaderInterface
             fclose($stream);
 
             try {
-                $this->sourceFilesystem->delete($sourceKey);
-            } catch (FilesystemException $exception) {
+                $this->sourceFileSystem->delete($sourceKey);
+            } catch (FilesystemException) {
             }
 
-            $this->cleanUp($this->sourceFilesystem, $sourceKey);
+            $this->cleanUp($this->sourceFileSystem, $sourceKey);
 
             $uploadable->setKey(null);
 
@@ -255,7 +245,7 @@ class Uploader implements UploaderInterface
                 if ($this->targetFileSystem->fileExists($path)) {
                     continue;
                 }
-            } catch (FilesystemException $exception) {
+            } catch (FilesystemException) {
             }
 
             break;
@@ -279,7 +269,7 @@ class Uploader implements UploaderInterface
 
             try {
                 $filesystem->deleteDirectory($key);
-            } catch (FilesystemException $exception) {
+            } catch (FilesystemException) {
                 return;
             }
 
