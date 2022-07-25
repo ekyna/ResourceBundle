@@ -24,13 +24,13 @@ use function sprintf;
 class ResourceToIdentifierTransformer implements DataTransformerInterface
 {
     protected ?ResourceRepositoryInterface $repository;
-    protected string $identifier;
-    protected bool $multiple;
+    protected string                       $identifier;
+    protected bool                         $multiple;
 
     public function __construct(
         ResourceRepositoryInterface $repository = null,
-        string $identifier = 'id',
-        bool $multiple = false
+        string                      $identifier = 'id',
+        bool                        $multiple = false
     ) {
         $this->repository = $repository;
         $this->identifier = $identifier;
@@ -113,7 +113,13 @@ class ResourceToIdentifierTransformer implements DataTransformerInterface
         }
 
         $transformer = function ($identifier): ResourceInterface {
-            if (null === $entity = $this->repository->findOneBy([$this->identifier => $identifier])) {
+            if ('id' === $this->identifier) {
+                $entity = $this->repository->find((int)$identifier);
+            } else {
+                $entity = $this->repository->findOneBy([$this->identifier => $identifier]);
+            }
+
+            if (null === $entity) {
                 throw new TransformationFailedException(sprintf(
                     'Object "%s" with identifier "%s"="%s" does not exist.',
                     $this->repository->getClassName(),

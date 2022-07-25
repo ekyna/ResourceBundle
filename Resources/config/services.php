@@ -27,6 +27,7 @@ use Ekyna\Component\Resource\Import\CsvImporter;
 use Ekyna\Component\Resource\Message\MessageQueue;
 use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\HttpKernel\KernelEvents;
+use Symfony\Component\Messenger\Event\WorkerMessageHandledEvent;
 
 return static function (ContainerConfigurator $container) {
     $container
@@ -161,7 +162,7 @@ return static function (ContainerConfigurator $container) {
             ->args([
                 service('oneup_flysystem.local_upload_filesystem'),
             ])
-        ->alias(LocalUploadController::class, 'ekyna_resource.controller.local_upload')->public()
+            ->alias(LocalUploadController::class, 'ekyna_resource.controller.local_upload')->public()
 
         // PDF Generator
         ->set('ekyna_resource.generator.pdf', PdfGenerator::class)
@@ -176,12 +177,19 @@ return static function (ContainerConfigurator $container) {
                 service('messenger.default_bus')->nullOnInvalid(),
             ])
             ->tag('kernel.event_listener', [
-                'event'  => KernelEvents::TERMINATE,
-                'method' => 'flush',
+                'event'    => KernelEvents::TERMINATE,
+                'method'   => 'flush',
+                'priority' => -2048,
             ])
             ->tag('kernel.event_listener', [
-                'event'  => ConsoleEvents::TERMINATE,
-                'method' => 'flush',
+                'event'    => ConsoleEvents::TERMINATE,
+                'method'   => 'flush',
+                'priority' => -2048,
+            ])
+            ->tag('kernel.event_listener', [
+                'event'    => WorkerMessageHandledEvent::class,
+                'method'   => 'flush',
+                'priority' => -2048,
             ])
     ;
 };
