@@ -268,6 +268,16 @@ class Uploader implements UploaderInterface
             $key = implode('/', $parts);
 
             try {
+                $listing = $filesystem->listContents($key, false);
+
+                if (!empty($listing->toArray())) {
+                    return;
+                }
+            } catch (FilesystemException) {
+                return;
+            }
+
+            try {
                 $filesystem->deleteDirectory($key);
             } catch (FilesystemException) {
                 return;
