@@ -29,8 +29,8 @@ return static function (ContainerConfigurator $container) {
         // Hidden resource form type
         ->set('ekyna_resource.form_type.hidden_resource', HiddenResourceType::class)
             ->args([
+                service('ekyna_resource.helper'),
                 service('ekyna_resource.repository.factory'),
-                service('form.type_guesser.doctrine'),
             ])
             ->tag('form.type')
 
@@ -45,7 +45,6 @@ return static function (ContainerConfigurator $container) {
         ->set('ekyna_resource.form_type.resource_choice', ResourceChoiceType::class)
             ->args([
                 service('ekyna_resource.helper'),
-                service('translator'),
             ])
             ->tag('form.type')
 

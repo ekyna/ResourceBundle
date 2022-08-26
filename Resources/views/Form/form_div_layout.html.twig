@@ -64,8 +64,7 @@
 
 {%- block ekyna_resource_search_widget -%}
     {%- set attr = attr|merge({
-        'class': 'resource-search form-control',
-        'data-placeholder': placeholder|trans
+        'class': 'resource-search form-control'
     }) -%}
     {{- block('choice_widget_collapsed') -}}
 {%- endblock ekyna_resource_search_widget -%}

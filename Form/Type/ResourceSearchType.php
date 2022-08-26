@@ -10,12 +10,10 @@ use Ekyna\Component\Resource\Repository\RepositoryFactoryInterface;
 use LogicException;
 use Symfony\Bridge\Doctrine\Form\DataTransformer\CollectionToArrayTransformer;
 use Symfony\Bridge\Doctrine\Form\EventListener\MergeDoctrineCollectionListener;
-use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\ChoiceList\View\ChoiceView;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
-use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\PropertyAccess\PropertyAccess;
@@ -29,21 +27,14 @@ use function Symfony\Component\Translation\t;
  * @package Ekyna\Bundle\ResourceBundle\Form\Type
  * @author  Etienne Dauvergne <contact@ekyna.com>
  */
-class ResourceSearchType extends AbstractType
+class ResourceSearchType extends AbstractResourceChoiceType
 {
-    private ResourceHelper             $helper;
-    private RepositoryFactoryInterface $factory;
-    private SerializerInterface        $serializer;
-
-
     public function __construct(
-        ResourceHelper $helper,
-        RepositoryFactoryInterface $factory,
-        SerializerInterface $serializer
+        ResourceHelper                              $resourceHelper,
+        private readonly RepositoryFactoryInterface $factory,
+        private readonly SerializerInterface        $serializer
     ) {
-        $this->helper = $helper;
-        $this->factory = $factory;
-        $this->serializer = $serializer;
+        parent::__construct($resourceHelper);
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -91,7 +82,7 @@ class ResourceSearchType extends AbstractType
         if (!empty($options['search_route'])) {
             $route = $options['search_route'];
         } elseif (!empty($options['search_action'])) {
-            $route = $this->helper->getRoute($options['resource'], $options['search_action']);
+            $route = $this->resourceHelper->getRoute($options['resource'], $options['search_action']);
         } else {
             throw new LogicException('Failed to find search route name.');
         }
@@ -107,13 +98,13 @@ class ResourceSearchType extends AbstractType
 
         if ($options['multiple']) {
             // Add "[]" to the name in case a select tag with multiple options is
-            // displayed. Otherwise only one of the selected options is sent in the
+            // displayed. Otherwise, only one of the selected options is sent in the
             // POST request.
             $view->vars['full_name'] .= '[]';
         }
 
         $view->vars['attr']['data-search'] = $this
-            ->helper
+            ->resourceHelper
             ->getUrlGenerator()
             ->generate($route, $options['search_parameters']); // TODO Locale parameter ?
 
@@ -123,39 +114,7 @@ class ResourceSearchType extends AbstractType
 
     public function configureOptions(OptionsResolver $resolver): void
     {
-        // TODO Assert that resource and class points to the same configuration.
-
-        $class = function (Options $options, $value) {
-            if (empty($value)) {
-                if (!isset($options['resource'])) {
-                    throw new InvalidOptionsException("You must define either 'resource' or 'class' option.");
-                }
-
-                return $this
-                    ->helper
-                    ->getResourceConfig($options['resource'])
-                    ->getEntityClass();
-            }
-
-            return $value;
-        };
-
-        $resource = function (Options $options, $value) {
-            if (empty($value)) {
-                if (!isset($options['class'])) {
-                    throw new InvalidOptionsException("You must define either 'resource' or 'class' option.");
-                }
-
-                return $this
-                    ->helper
-                    ->getResourceConfig($options['class'])
-                    ->getId();
-            }
-
-            return $value;
-        };
-
-        $emptyData = function (Options $options) {
+        $emptyData = static function (Options $options) {
             if ($options['multiple']) {
                 return [];
             }
@@ -163,7 +122,7 @@ class ResourceSearchType extends AbstractType
             return '';
         };
 
-        $placeholderNormalizer = function (Options $options, $placeholder) {
+        $placeholder = static function (Options $options, $placeholder) {
             if ($options['multiple']) {
                 // never use an empty value for this case
                 return null;
@@ -175,39 +134,25 @@ class ResourceSearchType extends AbstractType
 
         $resolver
             ->setDefaults([
-                'class'             => $class,
-                'resource'          => $resource,
                 'identifier'        => 'id',
                 'search_action'     => null,
                 'search_route'      => null,
                 'search_parameters' => [],
                 'compound'          => false,
                 'multiple'          => false,
-                'empty_data' => $emptyData,
-                'placeholder'       => $placeholderNormalizer,
+                'empty_data'        => $emptyData,
+                'placeholder'       => $placeholder,
                 'select2'           => false,
             ])
             ->setAllowedTypes('identifier', 'string')
             ->setAllowedTypes('search_action', ['null', 'string'])
             ->setAllowedTypes('search_route', ['null', 'string'])
             ->setAllowedTypes('search_parameters', 'array')
-            ->setAllowedTypes('multiple', 'bool')
-            ->setNormalizer('label', function (Options $options, $value) {
-                if (empty($value)) {
-                    $config = $this->helper->getResourceConfig($options['class']);
+            ->setAllowedTypes('multiple', 'bool');
 
-                    return t($config->getResourceLabel($options['multiple']), [], $config->getTransDomain());
-                }
-
-                return $value;
-            })
-            ->setNormalizer('placeholder', function (Options $options, $value) {
-                if (empty($value) && !$options['required'] && !$options['multiple']) {
-                    return t('field.search', [], 'EkynaUi');
-                }
-
-                return $value;
-            });
+        $this->configureClassAndResourceOptions($resolver);
+        $this->configureLabelOption($resolver);
+        $this->configurePlaceholderOption($resolver, t('field.search', [], 'EkynaUi'));
     }
 
     public function getBlockPrefix(): string
