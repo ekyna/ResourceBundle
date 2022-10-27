@@ -50,6 +50,9 @@ class EkynaResourceExtension extends Extension implements PrependExtensionInterf
         $container->prependExtensionConfig('doctrine', [
             'dbal' => [
                 'types' => [
+                    Type\AnniversaryType::NAME    => [
+                        'class' => Type\AnniversaryType::class,
+                    ],
                     PhoneNumberType::NAME        => [
                         'class' => PhoneNumberType::class,
                     ],

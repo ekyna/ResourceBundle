@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Ekyna\Bundle\ResourceBundle;
 
 use Ekyna\Bundle\ResourceBundle\DependencyInjection\Compiler;
-use Ekyna\Component\Resource\Bridge\Symfony\DependencyInjection\ContainerBuilder as ResourceContainerBuilder;
+use Ekyna\Component\Resource\Bridge\Symfony\DependencyInjection as CDI;
 use Ekyna\Component\Resource\Config\Loader\ConfigLoader;
 use Ekyna\Component\Resource\Config\Loader\YamlFileLoader;
 use Exception;
@@ -35,7 +35,7 @@ class EkynaResourceBundle extends Bundle
         /** @noinspection PhpUnhandledExceptionInspection */
         $loader = $this->loadResources($container);
 
-        $builder = new ResourceContainerBuilder();
+        $builder = new CDI\ContainerBuilder();
         $builder->configure($loader);
         $builder->build($container);
 
@@ -51,6 +51,7 @@ class EkynaResourceBundle extends Bundle
         $container->addCompilerPass(new Compiler\RouterHostsPass());
         $container->addCompilerPass(new Compiler\RedirectionProviderPass());
         $container->addCompilerPass(new Compiler\UploaderPass());
+        $container->addCompilerPass(new CDI\Compiler\ConfigureValidatorPass());
     }
 
     /**
