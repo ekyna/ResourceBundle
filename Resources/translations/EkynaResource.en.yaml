@@ -14,3 +14,5 @@ message:
         success: The resource has been successfully removed.
         integrity: This resource is associated to other resources and cannot be deleted.
         failure: The application encountered a database error. Resource has not been deleted.
+enum:
+    undefined: Undefined

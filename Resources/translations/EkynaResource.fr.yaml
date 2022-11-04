@@ -14,3 +14,5 @@ message:
         success: La ressource a été supprimée avec succès.
         integrity: Cette ressource est liée à d'autres ressources et ne peut pas être supprimée.
         failure: L'application a rencontré une erreur relative à la base de données. La ressource n'a pas été supprimée.
+enum:
+    undefined: Indéfini
