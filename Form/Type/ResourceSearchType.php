@@ -18,6 +18,8 @@ use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Contracts\Translation\TranslatableInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 use function array_replace;
 use function Symfony\Component\Translation\t;
@@ -26,13 +28,16 @@ use function Symfony\Component\Translation\t;
  * Class ResourceSearchType
  * @package Ekyna\Bundle\ResourceBundle\Form\Type
  * @author  Etienne Dauvergne <contact@ekyna.com>
+ *
+ * @TODO TODO Move to UiBundle ? (needs select2 JS)
  */
 class ResourceSearchType extends AbstractResourceChoiceType
 {
     public function __construct(
         ResourceHelper                              $resourceHelper,
         private readonly RepositoryFactoryInterface $factory,
-        private readonly SerializerInterface        $serializer
+        private readonly SerializerInterface        $serializer,
+        private readonly TranslatorInterface        $translator,
     ) {
         parent::__construct($resourceHelper);
     }
@@ -45,11 +50,13 @@ class ResourceSearchType extends AbstractResourceChoiceType
             new ResourceToIdentifierTransformer($repository, $options['identifier'], $options['multiple'])
         );
 
-        if ($options['multiple']) {
-            $builder
-                ->addViewTransformer(new CollectionToArrayTransformer(), true)
-                ->addEventSubscriber(new MergeDoctrineCollectionListener());
+        if (!$options['multiple']) {
+            return;
         }
+
+        $builder
+            ->addViewTransformer(new CollectionToArrayTransformer(), true)
+            ->addEventSubscriber(new MergeDoctrineCollectionListener());
     }
 
     public function buildView(FormView $view, FormInterface $form, array $options): void
@@ -87,6 +94,14 @@ class ResourceSearchType extends AbstractResourceChoiceType
             throw new LogicException('Failed to find search route name.');
         }
 
+        if (!$options['required'] && empty($options['placeholder'])) {
+            $options['placeholder'] = t('value.none', [], 'EkynaUi');
+        }
+
+        if ($options['placeholder'] instanceof TranslatableInterface) {
+            $options['placeholder'] = $options['placeholder']->trans($this->translator);
+        }
+
         $view->vars = array_replace($view->vars, [
             'value'             => $value,
             'choices'           => $choices,
@@ -110,6 +125,10 @@ class ResourceSearchType extends AbstractResourceChoiceType
 
         // Select2 options
         $view->vars['attr']['data-allow-clear'] = (!$options['required'] && !$options['multiple']) ? 1 : 0;
+
+        if (!empty($options['placeholder']) && empty($view->vars['attr']['data-placeholder'])) {
+            $view->vars['attr']['data-placeholder'] = $options['placeholder'];
+        }
     }
 
     public function configureOptions(OptionsResolver $resolver): void

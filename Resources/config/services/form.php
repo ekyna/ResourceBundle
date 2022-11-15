@@ -53,6 +53,7 @@ return static function (ContainerConfigurator $container) {
             service('ekyna_resource.helper'),
             service('ekyna_resource.repository.factory'),
             service('serializer'),
+            service('translator'),
         ])
         ->tag('form.type')
         ->tag('form.js', [
