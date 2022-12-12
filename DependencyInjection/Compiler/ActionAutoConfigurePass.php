@@ -6,6 +6,8 @@ namespace Ekyna\Bundle\ResourceBundle\DependencyInjection\Compiler;
 
 use Ekyna\Bundle\ResourceBundle\Action;
 use Ekyna\Component\Resource\Bridge\Symfony\DependencyInjection\Compiler\ActionAutoConfigurePass as BasePass;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\DependencyInjection\Reference;
 
 /**
  * Class ActionAutoConfigurePass
@@ -37,6 +39,9 @@ class ActionAutoConfigurePass extends BasePass
             ],
             Action\ManagerTrait::class                 => [
                 'setManagerFactory' => 'ekyna_resource.manager.factory',
+            ],
+            Action\MessengerTrait::class               => [
+                'setMessageBus' => new Reference('messenger.bus.default', ContainerInterface::NULL_ON_INVALID_REFERENCE),
             ],
             Action\RegistryTrait::class                => [
                 'setRegistryFactory' => 'ekyna_resource.config.registry_factory',

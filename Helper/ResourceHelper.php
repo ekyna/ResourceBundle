@@ -195,9 +195,22 @@ final class ResourceHelper
 
         try {
             return $this->router->generate($event->getData('route'), $parameters, $type);
-        } catch (RoutingException $exception) {
+        } catch (RoutingException) {
             return null;
         }
+    }
+
+    /**
+     * Returns the resource has the given action.
+     */
+    public function hasAction(ResourceInterface|string $resource, string $action): bool
+    {
+        $aCfg = $this->actionRegistry->find($action);
+
+        return $this
+            ->resourceRegistry
+            ->find($resource)
+            ->hasAction($aCfg->getClass());
     }
 
     /**
