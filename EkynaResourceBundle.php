@@ -13,7 +13,6 @@ use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\Loader\DelegatingLoader;
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\Config\Loader\LoaderResolver;
-use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
@@ -43,10 +42,6 @@ class EkynaResourceBundle extends Bundle
             $container->addObjectResource($builder);
         }
 
-        // Before symfony's register listener pass
-        /** @see \Symfony\Component\EventDispatcher\DependencyInjection\RegisterListenersPass */
-        $container->addCompilerPass(new Compiler\MessengerPass(), PassConfig::TYPE_BEFORE_REMOVING, 1);
-
         $container->addCompilerPass(new Compiler\ActionAutoConfigurePass());
         $container->addCompilerPass(new Compiler\RouterHostsPass());
         $container->addCompilerPass(new Compiler\RedirectionProviderPass());
@@ -64,10 +59,10 @@ class EkynaResourceBundle extends Bundle
      */
     private function loadResources(ContainerBuilder $container): ConfigLoader
     {
-        $projectDir   = $container->getParameter('kernel.project_dir');
+        $projectDir = $container->getParameter('kernel.project_dir');
         $configLoader = new ConfigLoader();
 
-        $locator  = new FileLocator([$projectDir]);
+        $locator = new FileLocator([$projectDir]);
         $resolver = new LoaderResolver([
             // TODO new XmlFileLoader($container, $locator),
             new YamlFileLoader($configLoader, $locator),

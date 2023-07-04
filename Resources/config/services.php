@@ -176,7 +176,7 @@ return static function (ContainerConfigurator $container) {
     // Message queue
     $services->set('ekyna_resource.queue.message', MessageQueue::class)
         ->args([
-            service('messenger.default_bus')->nullOnInvalid(),
+            service('messenger.default_bus'),
         ])
         ->tag('kernel.event_listener', [
             'event'    => KernelEvents::TERMINATE,

@@ -23,6 +23,7 @@
         "symfony/framework-bundle": "^5.0",
         "symfony/proxy-manager-bridge": "^5.0",
         "symfony/mailer": "^5.0",
+        "symfony/messenger": "^5.0",
         "symfony/translation": "^5.0",
         "friendsofsymfony/elastica-bundle": "^6.0",
         "friendsofsymfony/jsrouting-bundle": "^3.1",
