@@ -80,27 +80,31 @@ class TreeTranslationSlugHandler implements SlugHandlerInterface
         $locale = $wrapped->getPropertyValue($options['locale']);
 
         $wrapped = AbstractWrapper::wrap($relation, $this->om);
-        if ($parent = $wrapped->getPropertyValue($options['relationParentRelationField'])) {
-            if (isset($options['parentSkipExpression']) && !empty($expression = $options['parentSkipExpression'])) {
-                $language = new ExpressionLanguage();
-                if ($language->evaluate($expression, ['parent' => $parent])) {
-                    return;
-                }
-            }
+        if (!$parent = $wrapped->getPropertyValue($options['relationParentRelationField'])) {
+            return;
+        }
 
-            $translation = call_user_func_array([$parent, $options['translate']], [$locale]);
-
-            $this->parentSlug = $translation->{$options['parentFieldMethod']}();
-
-            // if needed, remove suffix from parentSlug, so we can use it to prepend it to our slug
-            if (isset($options['suffix']) && !empty($options['suffix'])) {
-                $suffix = $options['suffix'];
-
-                if (substr($this->parentSlug, -strlen($suffix)) === $suffix) { //endsWith
-                    $this->parentSlug = substr_replace($this->parentSlug, '', -strlen($suffix));
-                }
+        if (isset($options['parentSkipExpression']) && !empty($expression = $options['parentSkipExpression'])) {
+            $language = new ExpressionLanguage();
+            if ($language->evaluate($expression, ['parent' => $parent])) {
+                return;
             }
         }
+
+        $translation = call_user_func_array([$parent, $options['translate']], [$locale]);
+
+        $this->parentSlug = $translation->{$options['parentFieldMethod']}();
+
+        // if needed, remove suffix from parentSlug, so we can use it to prepend it to our slug
+        if (isset($options['suffix']) && !empty($options['suffix'])) {
+            $suffix = $options['suffix'];
+
+            if (str_ends_with($this->parentSlug, $suffix)) {
+                $this->parentSlug = substr_replace($this->parentSlug, '', -strlen($suffix));
+            }
+        }
+
+        $this->parentSlug = rtrim($this->parentSlug, $this->usedPathSeparator);
     }
 
     /**
