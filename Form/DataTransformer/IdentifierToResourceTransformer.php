@@ -137,7 +137,7 @@ class IdentifierToResourceTransformer implements DataTransformerInterface
     }
 
     /**
-     * Asserts the the repository is set.
+     * Asserts the repository is set.
      */
     private function assertRepository(): void
     {

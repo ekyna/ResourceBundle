@@ -13,6 +13,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 use function array_combine;
+use function array_key_exists;
 use function array_keys;
 use function array_map;
 use function array_values;
@@ -71,7 +72,17 @@ class ConstantChoiceTypeHelper
                 }, array_keys($choices)), array_values($choices));
             })
             ->setDefault('choice_translation_domain', false)
-            ->setDefault('placeholder', $this->translator->trans('value.none', [], 'EkynaUi'))
+            ->setDefault('placeholder', function (Options $options, $value) {
+                if ($value) {
+                    return $value;
+                }
+
+                if (array_key_exists('required', (array)$options) && $options['required']) {
+                    return $value;
+                }
+
+                return $this->translator->trans('value.none', [], 'EkynaUi');
+            })
             ->setAllowedTypes('class', 'string')
             ->setAllowedTypes('accessor', 'string')
             ->setAllowedTypes('filter', ['string', 'string[]'])
