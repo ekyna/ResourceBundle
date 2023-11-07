@@ -77,7 +77,7 @@ class ConstantChoiceTypeHelper
                     return $value;
                 }
 
-                if (array_key_exists('required', (array)$options) && $options['required']) {
+                if (isset($options['required']) && $options['required']) {
                     return $value;
                 }
 
