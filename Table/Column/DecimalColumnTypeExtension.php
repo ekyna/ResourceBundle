@@ -26,6 +26,16 @@ class DecimalColumnTypeExtension extends AbstractColumnTypeExtension
         }
     }
 
+    public function export(ColumnInterface $column, RowInterface $row, array $options): ?string
+    {
+        $value = $row->getData($column->getConfig()->getPropertyPath());
+        if ($value instanceof Decimal) {
+            return $value->toFixed($options['scale'] ?? $options['precision'] ?? 2);
+        }
+
+        return (string)$value;
+    }
+
     public static function getExtendedTypes(): array
     {
         return [NumberType::class, PriceType::class];
