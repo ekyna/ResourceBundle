@@ -75,9 +75,9 @@ interface AclManagerInterface
     ): bool;
 
     /**
-     * Synchronizes database with changes.
+     * Synchronizes the database with changes.
      */
-    public function flush();
+    public function flush(): void;
 
     /**
      * Returns the subject access control list.

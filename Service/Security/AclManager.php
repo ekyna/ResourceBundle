@@ -26,40 +26,19 @@ use function array_replace;
  */
 class AclManager implements AclManagerInterface
 {
-    private PermissionRegistryInterface $permissionRegistry;
-    private NamespaceRegistryInterface  $namespaceRegistry;
-    private ResourceRegistryInterface   $resourceRegistry;
-    private AceRepository               $repository;
-    private CacheItemPoolInterface      $itemCache;
-    private array                       $aclCache;
-    private EntityManagerInterface      $wrapped;
+    private EntityManagerInterface $wrapped;
+    private array                  $aclCache;
 
-
-    /**
-     * Constructor.
-     *
-     * @param PermissionRegistryInterface $permissionRegistry
-     * @param NamespaceRegistryInterface  $namespaceRegistry
-     * @param ResourceRegistryInterface   $resourceRegistry
-     * @param AceRepository               $repository
-     * @param ManagerRegistry             $registry
-     * @param CacheItemPoolInterface      $itemCache
-     */
     public function __construct(
-        PermissionRegistryInterface $permissionRegistry,
-        NamespaceRegistryInterface $namespaceRegistry,
-        ResourceRegistryInterface $resourceRegistry,
-        AceRepository $repository,
-        ManagerRegistry $registry,
-        CacheItemPoolInterface $itemCache
+        private readonly PermissionRegistryInterface $permissionRegistry,
+        private readonly NamespaceRegistryInterface  $namespaceRegistry,
+        private readonly ResourceRegistryInterface   $resourceRegistry,
+        private readonly AceRepository               $aceRepository,
+        private readonly CacheItemPoolInterface      $itemCache,
+        ManagerRegistry                              $registry,
     ) {
-        $this->permissionRegistry = $permissionRegistry;
-        $this->namespaceRegistry = $namespaceRegistry;
-        $this->resourceRegistry = $resourceRegistry;
-        $this->repository = $repository;
         /** @noinspection PhpFieldAssignmentTypeMismatchInspection */
         $this->wrapped = $registry->getManagerForClass(AccessControlEntry::class);
-        $this->itemCache = $itemCache;
         $this->aclCache = [];
     }
 
@@ -128,16 +107,16 @@ class AclManager implements AclManagerInterface
      */
     public function setPermission(
         AclSubjectInterface $subject,
-        string $namespace,
-        string $resource,
-        string $name,
-        bool $value
+        string              $namespace,
+        string              $resource,
+        string              $name,
+        bool                $value
     ): bool {
         $inherited = $this->getInherited($subject, $namespace, $resource, $name);
 
-        $ace = $this->repository->findAce($subject, $namespace, $resource, $name);
+        $ace = $this->aceRepository->findAce($subject, $namespace, $resource, $name);
 
-        // Change to granted
+        // Change to 'granted'
         if ($value) {
             // If no inheritance
             if (null === $inherited) {
@@ -172,7 +151,7 @@ class AclManager implements AclManagerInterface
             return false;
         }
 
-        // Change to denied
+        // Change to 'denied'
         // If inherited is granted
         if (true === $inherited) {
             // Create ace if not exists
@@ -202,7 +181,7 @@ class AclManager implements AclManagerInterface
     /**
      * @inheritDoc
      */
-    public function flush()
+    public function flush(): void
     {
         $this->wrapped->flush();
     }
@@ -286,9 +265,9 @@ class AclManager implements AclManagerInterface
      */
     public function getPermission(
         AclSubjectInterface $subject,
-        string $namespace,
-        string $resource,
-        string $name
+        string              $namespace,
+        string              $resource,
+        string              $name
     ): array {
         $value = $this->getValue($subject, $namespace, $resource, $name);
         $inherited = $this->getInherited($subject, $namespace, $resource, $name);
@@ -341,7 +320,7 @@ class AclManager implements AclManagerInterface
             return $item->get();
         }
 
-        $acl = $this->aclCache[$id] = $this->repository->findAcl($subject);
+        $acl = $this->aclCache[$id] = $this->aceRepository->findAcl($subject);
 
         $item->set($acl);
         $this->itemCache->save($item);
@@ -362,11 +341,11 @@ class AclManager implements AclManagerInterface
      */
     private function setCache(
         AclSubjectInterface $subject,
-        string $namespace,
-        string $resource,
-        string $name,
-        bool $value = null
-    ) {
+        string              $namespace,
+        string              $resource,
+        string              $name,
+        bool                $value = null
+    ): void {
         $id = $subject->getAclSubjectId();
 
         /** @noinspection PhpUnhandledExceptionInspection */
@@ -407,9 +386,9 @@ class AclManager implements AclManagerInterface
      */
     private function getValue(
         AclSubjectInterface $subject,
-        string $namespace,
-        string $resource,
-        string $name
+        string              $namespace,
+        string              $resource,
+        string              $name
     ): ?bool {
         $acl = $this->loadAcl($subject);
 
@@ -432,9 +411,9 @@ class AclManager implements AclManagerInterface
      */
     private function getInherited(
         AclSubjectInterface $subject,
-        string $namespace,
-        string $resource,
-        string $name
+        string              $namespace,
+        string              $resource,
+        string              $name
     ): ?bool {
         $parent = $subject;
         while ($parent = $parent->getAclParentSubject()) {
@@ -481,9 +460,9 @@ class AclManager implements AclManagerInterface
      */
     private function createAce(
         AclSubjectInterface $subject,
-        string $namespace,
-        string $resource,
-        string $permission
+        string              $namespace,
+        string              $resource,
+        string              $permission
     ): AccessControlEntry {
         $ace = new AccessControlEntry();
 

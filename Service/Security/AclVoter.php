@@ -8,12 +8,13 @@ use Ekyna\Bundle\ResourceBundle\Model\AclSubjectInterface;
 use Ekyna\Component\Resource\Action\Permission;
 use Ekyna\Component\Resource\Config\Registry\ActionRegistryInterface;
 use Ekyna\Component\Resource\Config\Registry\PermissionRegistryInterface;
+use Ekyna\Component\Resource\Config\Registry\ResourceRegistryInterface;
 use Ekyna\Component\Resource\Model\ResourceInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 
-use function is_object;
+use function get_class;
 use function is_string;
 
 /**
@@ -23,38 +24,33 @@ use function is_string;
  */
 class AclVoter extends Voter
 {
-    private AccessDecisionManagerInterface $decision;
-    private AclManagerInterface            $acl;
-    private ActionRegistryInterface        $actionRegistry;
-    private PermissionRegistryInterface    $permissionRegistry;
-
-
     public function __construct(
-        AccessDecisionManagerInterface $decision,
-        AclManagerInterface $acl,
-        ActionRegistryInterface $actionRegistry,
-        PermissionRegistryInterface $permissionRegistry
+        private readonly AccessDecisionManagerInterface $decisionManager,
+        private readonly AclManagerInterface            $aclManager,
+        private readonly ActionRegistryInterface        $actionRegistry,
+        private readonly PermissionRegistryInterface    $permissionRegistry,
+        private readonly ResourceRegistryInterface      $resourceRegistry,
     ) {
-        $this->decision = $decision;
-        $this->acl = $acl;
-        $this->actionRegistry = $actionRegistry;
-        $this->permissionRegistry = $permissionRegistry;
     }
 
     /**
      * @inheritDoc
      */
-    protected function supports($attribute, $subject): bool
+    protected function supports(string $attribute, $subject): bool
     {
-        if (!is_string($attribute) || empty($attribute) || empty($subject)) {
+        if (empty($attribute) || empty($subject)) {
             return false;
         }
 
-        if (is_object($subject) && !$subject instanceof ResourceInterface) {
+        if ($subject instanceof ResourceInterface) {
+            $subject = get_class($subject);
+        }
+
+        if (!is_string($subject)) {
             return false;
         }
 
-        if (null === $this->acl->getResourceRegistry()->find($subject, false)) {
+        if (null === $this->resourceRegistry->has($subject)) {
             return false;
         }
 
@@ -68,15 +64,15 @@ class AclVoter extends Voter
     /**
      * @inheritDoc
      */
-    protected function voteOnAttribute($attribute, $subject, TokenInterface $token): bool
+    protected function voteOnAttribute(string $attribute, $subject, TokenInterface $token): bool
     {
         /* TODO ? if ($token instanceof NullToken) {
             // the user is not authenticated, e.g. only allow them to
-            // see public posts
+            // see public resources
         }*/
 
         // ROLE_SUPER_ADMIN has always access granted
-        if ($this->decision->decide($token, ['ROLE_SUPER_ADMIN'])) {
+        if ($this->decisionManager->decide($token, ['ROLE_SUPER_ADMIN'])) {
             return true;
         }
 
@@ -85,10 +81,28 @@ class AclVoter extends Voter
             return false;
         }
 
-        if ($this->actionRegistry->has($attribute)) {
-            $attribute = $this->actionRegistry->find($attribute)->getPermission() ?: Permission::READ;
+        if (!$this->actionRegistry->has($attribute)) {
+            return $this->aclManager->isGranted($user, $subject, $attribute);
         }
 
-        return $this->acl->isGranted($user, $subject, $attribute);
+        $aConfig = $this->actionRegistry->find($attribute);
+        $attributes = $aConfig->getPermissions();
+
+        $attributes += $this
+                           ->resourceRegistry
+                           ->find($subject)
+                           ->getAction($aConfig->getName())['permissions'] ?? [];
+
+        if (empty($attributes)) {
+            return $this->aclManager->isGranted($user, $subject, Permission::READ);
+        }
+
+        foreach ($attributes as $attribute) {
+            if (!$this->aclManager->isGranted($user, $subject, $attribute)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

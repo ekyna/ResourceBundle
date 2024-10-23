@@ -28,8 +28,8 @@ return static function (ContainerConfigurator $container) {
             service('ekyna_resource.registry.namespace'),
             service('ekyna_resource.registry.resource'),
             service('ekyna_resource.repository.ace'),
-            service('doctrine'),
             service('ekyna_resource.cache'),
+            service('doctrine'),
         ])
         ->alias(AclManagerInterface::class, 'ekyna_resource.acl.manager');
 
@@ -40,6 +40,7 @@ return static function (ContainerConfigurator $container) {
             service('ekyna_resource.acl.manager'),
             service('ekyna_resource.registry.action'),
             service('ekyna_resource.registry.permission'),
+            service('ekyna_resource.registry.resource'),
         ])
         ->tag('security.voter');
 

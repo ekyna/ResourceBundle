@@ -18,19 +18,11 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
  */
 class ActionListener
 {
-    private ActionRegistryInterface       $actionRegistry;
-    private ContextFactory                $contextFactory;
-    private AuthorizationCheckerInterface $authorization;
-
-
     public function __construct(
-        ActionRegistryInterface $actionRegistry,
-        ContextFactory $contextFactory,
-        AuthorizationCheckerInterface $authorization
+        private readonly ActionRegistryInterface       $actionRegistry,
+        private readonly ContextFactory                $contextFactory,
+        private readonly AuthorizationCheckerInterface $authorization
     ) {
-        $this->actionRegistry = $actionRegistry;
-        $this->contextFactory = $contextFactory;
-        $this->authorization = $authorization;
     }
 
     /**
@@ -40,13 +32,13 @@ class ActionListener
      */
     public function onKernelController(ControllerEvent $event): void
     {
-        $action = $event->getController();
+        $controller = $event->getController();
 
-        if (!$action instanceof Action\ActionInterface) {
+        if (!$controller instanceof Action\ActionInterface) {
             return;
         }
 
-        $config = $this->actionRegistry->find(get_class($action));
+        $config = $this->actionRegistry->find(get_class($controller));
 
         $request = $event->getRequest();
 
@@ -54,23 +46,23 @@ class ActionListener
             ->contextFactory
             ->getContext($request->attributes->get('_resource'));
 
-        if ($permission = $config->getPermission()) {
-            if (!$resource = $context->getResource()) {
-                $resource = $context->getConfig()->getId();
-            }
-
-            if (!$this->authorization->isGranted($permission, $resource)) {
-                throw new AccessDeniedHttpException();
-            }
+        if (null === $resource = $context->getResource()) {
+            $resource = $context->getConfig()->getId();
         }
 
-        $action
+        if (!$this->authorization->isGranted($config->getName(), $resource)) {
+            throw new AccessDeniedHttpException();
+        }
+
+        $controller
             ->setConfig($config)
             ->setRequest($request)
             ->setContext($context)
-            ->setOptions(array_replace_recursive(
-                $config->getDefaultOptions(),
-                $context->getConfig()->getAction($config->getClass())
-            ));
+            ->setOptions(
+                array_replace_recursive(
+                    $config->getDefaultOptions(),
+                    $context->getConfig()->getAction($config->getClass())
+                )
+            );
     }
 }
