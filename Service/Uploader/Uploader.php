@@ -205,7 +205,7 @@ class Uploader implements UploaderInterface
 
         try {
             if (!$this->targetFileSystem->fileExists($path)) {
-                throw new UploadException(sprintf('File "%s" not found.', $path));
+                return;
             }
         } catch (FilesystemException $exception) {
             throw new UploadException(sprintf('File "%s" not found.', $path), 0, $exception);
