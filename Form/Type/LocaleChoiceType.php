@@ -42,7 +42,7 @@ class LocaleChoiceType extends AbstractType
             ->setAllowedTypes('locales', ['array', 'null'])
             ->setNormalizer('placeholder', function (Options $options, $value) {
                 if (empty($value) && !$options['required'] && !$options['multiple']) {
-                    $value = 'value.none';
+                    $value = t('value.none', [], 'EkynaUi');
                 }
 
                 return $value;
