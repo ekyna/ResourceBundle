@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
 use Ekyna\Bundle\ResourceBundle\Behavior\IsDefaultBehavior;
+use Ekyna\Bundle\ResourceBundle\Command\FilesystemsCheckCommand;
 use Ekyna\Bundle\ResourceBundle\Controller\LocalUploadController;
 use Ekyna\Bundle\ResourceBundle\EventListener\ActionListener;
 use Ekyna\Bundle\ResourceBundle\EventListener\KernelExceptionListener;
@@ -204,4 +205,13 @@ return static function (ContainerConfigurator $container) {
     // Twig extension
     $services->set('ekyna_resource.twig.extension', ResourceExtension::class)
         ->tag('twig.extension');
+
+    // Filesystems check command
+    $services->set('ekyna_resource.command.filesystems_check', FilesystemsCheckCommand::class)
+        ->args([
+            service('ekyna_resource.registry.resource'),
+            service('ekyna_resource.uploader_resolver'),
+            service('doctrine'),
+        ])
+        ->tag('console.command');
 };

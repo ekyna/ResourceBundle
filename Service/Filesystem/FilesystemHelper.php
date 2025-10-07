@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Ekyna\Bundle\ResourceBundle\Service\Filesystem;
 
 use DateTime;
-use League\Flysystem\Filesystem;
 use League\Flysystem\FilesystemAdapter;
 use League\Flysystem\FilesystemException;
+use League\Flysystem\FilesystemOperator;
 use League\Flysystem\Local\LocalFilesystemAdapter;
 use League\Flysystem\PathNormalizer;
 use League\Flysystem\PathPrefixer;
@@ -38,8 +38,8 @@ class FilesystemHelper
     private ?PathPrefixer      $pathPrefixer   = null;
 
     public function __construct(
-        private readonly Filesystem $filesystem,
-        private readonly int        $streamThreshold = 1014 * 1024
+        private readonly FilesystemOperator $filesystem,
+        private readonly int                $streamThreshold = 1014 * 1024
     ) {
     }
 
