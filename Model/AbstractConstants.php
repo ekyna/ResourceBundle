@@ -9,7 +9,6 @@ use Symfony\Contracts\Translation\TranslatableInterface;
 
 use function array_key_exists;
 use function array_keys;
-use function in_array;
 use function reset;
 use function sprintf;
 use function Symfony\Component\Translation\t;
@@ -26,35 +25,14 @@ abstract class AbstractConstants implements ConstantsInterface
         return array_keys(static::getConfig());
     }
 
-    public static function getChoices(array $filter = [], int $mode = self::FILTER_EXCLUDE): array
+    public static function getChoices(array $filter = [], int $mode = Filter::EXCLUDE): array
     {
-        if (0 !== $mode && 1 !== $mode) {
-            throw new InvalidArgumentException('Invalid filter mode');
-        }
-
-        if (!empty($filter)) {
-            foreach ($filter as $value) {
-                static::isValid($value, true);
-            }
-        }
-
         $choices = [];
         foreach (static::getConfig() as $constant => $config) {
-            if (!empty($filter)) {
-                // Exclusion
-                if (($mode === 0) && in_array($constant, $filter, true)) {
-                    continue;
-                }
-                // Restriction
-                if (($mode === 1) && !in_array($constant, $filter, true)) {
-                    continue;
-                }
-            }
-
             $choices[$config[0]] = $constant;
         }
 
-        return $choices;
+        return Filter::filter($choices, $mode, $filter);
     }
 
     public static function getDefaultChoice(): ?string

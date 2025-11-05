@@ -5,15 +5,14 @@ declare(strict_types=1);
 namespace Ekyna\Bundle\ResourceBundle\Form;
 
 use Ekyna\Bundle\ResourceBundle\Model\ConstantsInterface;
+use Ekyna\Bundle\ResourceBundle\Model\Filter;
 use ReflectionClass;
 use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 use function array_combine;
-use function array_key_exists;
 use function array_keys;
 use function array_map;
 use function array_values;
@@ -44,14 +43,14 @@ class ConstantChoiceTypeHelper
             ->setDefaults([
                 'accessor'    => 'getChoices',
                 'filter'      => [],
-                'filter_mode' => ConstantsInterface::FILTER_EXCLUDE,
+                'filter_mode' => Filter::EXCLUDE,
             ])
             ->setDefault('choices', function (Options $options, $value) {
                 if (!empty($value)) {
                     return $value;
                 }
 
-                $class  = $options['class'];
+                $class = $options['class'];
                 $method = $options['accessor'];
                 $this->validateCallback($class, $method);
 
@@ -67,7 +66,7 @@ class ConstantChoiceTypeHelper
                 /** @see ConstantsInterface::getTranslationDomain() */
                 $domain = call_user_func($options['class'] . '::getTranslationDomain');
 
-                return array_combine(array_map(function(string $label) use ($domain) {
+                return array_combine(array_map(function (string $label) use ($domain) {
                     return $this->translator->trans($label, [], $domain);
                 }, array_keys($choices)), array_values($choices));
             })
@@ -86,14 +85,14 @@ class ConstantChoiceTypeHelper
             ->setAllowedTypes('class', 'string')
             ->setAllowedTypes('accessor', 'string')
             ->setAllowedTypes('filter', ['string', 'string[]'])
-            ->setAllowedValues('class', function($value) {
+            ->setAllowedValues('class', function ($value) {
                 return is_subclass_of($value, ConstantsInterface::class);
             })
             ->setAllowedValues('filter_mode', [
-                ConstantsInterface::FILTER_EXCLUDE,
-                ConstantsInterface::FILTER_RESTRICT,
+                Filter::EXCLUDE,
+                Filter::RESTRICT,
             ])
-            ->setNormalizer('filter', function(Options $options, $value) {
+            ->setNormalizer('filter', function (Options $options, $value) {
                 if (!is_array($value)) {
                     return (array)$value;
                 }

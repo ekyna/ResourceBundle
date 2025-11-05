@@ -13,9 +13,6 @@ use Symfony\Contracts\Translation\TranslatableInterface;
  */
 interface ConstantsInterface
 {
-    public const FILTER_EXCLUDE  = 0;
-    public const FILTER_RESTRICT = 1;
-
     /**
      * Returns the constants configuration.
      *
@@ -43,7 +40,7 @@ interface ConstantsInterface
      * @param array $filter The values to filter.
      * @param int   $mode   The filter mode (0: exclusion, 1: restriction).
      */
-    public static function getChoices(array $filter = [], int $mode = self::FILTER_EXCLUDE): array;
+    public static function getChoices(array $filter = [], int $mode = Filter::EXCLUDE): array;
 
     /**
      * Returns the default constant choice.
