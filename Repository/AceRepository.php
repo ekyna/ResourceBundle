@@ -20,15 +20,19 @@ class AceRepository
     private ObjectRepository $wrapped;
     private ?Query           $listQuery = null;
 
-
-    /**
-     * Constructor.
-     *
-     * @param ManagerRegistry $registry
-     */
     public function __construct(ManagerRegistry $registry)
     {
         $this->wrapped = $registry->getRepository(AccessControlEntry::class);
+    }
+
+    public function hasAce(): bool
+    {
+        return null !== $this
+            ->wrapped
+            ->createQueryBuilder('a')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
     }
 
     /**
@@ -40,7 +44,6 @@ class AceRepository
      * @param string              $permission
      *
      * @return AccessControlEntry|null
-     * @noinspection PhpDocMissingThrowsInspection
      */
     public function findAce(
         AclSubjectInterface $subject,
@@ -48,7 +51,6 @@ class AceRepository
         string $resource,
         string $permission
     ): ?AccessControlEntry {
-        /** @noinspection PhpUnhandledExceptionInspection */
         return $this
             ->wrapped
             ->createQueryBuilder('a')
