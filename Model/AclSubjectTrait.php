@@ -11,7 +11,7 @@ namespace Ekyna\Bundle\ResourceBundle\Model;
  */
 trait AclSubjectTrait
 {
-    private ?string $aclSubjectId = null;
+    protected ?string $aclSubjectId = null;
 
 
     /**
