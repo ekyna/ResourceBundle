@@ -12,7 +12,6 @@ use Ekyna\Component\Resource\Config\Registry\ResourceRegistryInterface;
 use Ekyna\Component\Resource\Model\ResourceInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
-use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 
 use function get_class;
 use function is_string;
@@ -22,7 +21,7 @@ use function is_string;
  * @package Ekyna\Bundle\ResourceBundle
  * @author  Etienne Dauvergne <contact@ekyna.com>
  */
-class AclVoter extends Voter
+class AclVoter extends UserVoter
 {
     public function __construct(
         private readonly AccessDecisionManagerInterface $decisionManager,
@@ -76,10 +75,8 @@ class AclVoter extends Voter
             return true;
         }
 
+        /** @var AclSubjectInterface $user */
         $user = $token->getUser();
-        if (!$user instanceof AclSubjectInterface) {
-            return false;
-        }
 
         if (!$this->actionRegistry->has($attribute)) {
             return $this->aclManager->isGranted($user, $subject, $attribute);
@@ -104,5 +101,10 @@ class AclVoter extends Voter
         }
 
         return true;
+    }
+
+    protected function getUserClass(): string
+    {
+        return AclSubjectInterface::class;
     }
 }
