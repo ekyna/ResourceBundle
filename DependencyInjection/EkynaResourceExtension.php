@@ -6,6 +6,8 @@ namespace Ekyna\Bundle\ResourceBundle\DependencyInjection;
 
 use DoctrineExtensions\Query\Mysql;
 use Ekyna\Component\Resource\Doctrine\DBAL\Type;
+use Ekyna\Component\Resource\Helper\ChromeToPdfGenerator;
+use Ekyna\Component\Resource\Helper\GotenbergGenerator;
 use Ekyna\Component\Resource\Resource;
 use Misd\PhoneNumberBundle\Doctrine\DBAL\Types\PhoneNumberType;
 use ReflectionClass;
@@ -161,9 +163,31 @@ class EkynaResourceExtension extends Extension implements PrependExtensionInterf
 
     private function configurePdf(array $config, ContainerBuilder $container): void
     {
-        $container
-            ->getDefinition('ekyna_resource.generator.pdf')
-            ->setArguments([$config['entry_point'], $config['token']]);
+        $definition = $container->getDefinition('ekyna_resource.generator.pdf');
+
+        $definition
+            ->setClass(
+                match ($config['service']) {
+                    GotenbergGenerator::NAME   => GotenbergGenerator::class,
+                    ChromeToPdfGenerator::NAME => ChromeToPdfGenerator::class,
+                }
+            );
+
+        // Gotenberg
+        if ($config['service'] === GotenbergGenerator::NAME) {
+            $definition->setArguments([
+                $config['entry_point'],
+                $container->getParameter('kernel.project_dir')
+            ]);
+
+            return;
+        }
+
+        // Chrome To PDF
+        $definition->setArguments([
+            $config['entry_point'],
+            $config['token']
+        ]);
     }
 
     private function configureReport(array $config, ContainerBuilder $container): void

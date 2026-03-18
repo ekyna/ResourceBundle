@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Ekyna\Bundle\ResourceBundle\DependencyInjection;
 
+use Ekyna\Component\Resource\Helper\ChromeToPdfGenerator;
+use Ekyna\Component\Resource\Helper\GotenbergGenerator;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
@@ -62,8 +64,12 @@ class Configuration implements ConfigurationInterface
                 ->arrayNode('pdf')
                     ->isRequired()
                     ->children()
-                        ->scalarNode('entry_point')->isRequired()->cannotBeEmpty()->end()
-                        ->scalarNode('token')->isRequired()->cannotBeEmpty()->end()
+                        ->enumNode('service')
+                            ->values([GotenbergGenerator::NAME, ChromeToPdfGenerator::NAME])
+                            ->isRequired()
+                        ->end()
+                        ->scalarNode('entry_point')->isRequired()->end()
+                        ->scalarNode('token')->end()
                     ->end()
                 ->end()
             ->end();

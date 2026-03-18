@@ -25,7 +25,8 @@ use Ekyna\Component\Resource\Bridge\Symfony\Serializer\ResourceNormalizer;
 use Ekyna\Component\Resource\Copier\Copier;
 use Ekyna\Component\Resource\Copier\CopierInterface;
 use Ekyna\Component\Resource\Helper\EnumHelper;
-use Ekyna\Component\Resource\Helper\PdfGenerator;
+use Ekyna\Component\Resource\Helper\GotenbergGenerator;
+use Ekyna\Component\Resource\Helper\PdfGeneratorInterface;
 use Ekyna\Component\Resource\Import\CsvImporter;
 use Ekyna\Component\Resource\Message\MessageQueue;
 use Symfony\Component\Console\ConsoleEvents;
@@ -168,7 +169,7 @@ return static function (ContainerConfigurator $container) {
         ->alias(LocalUploadController::class, 'ekyna_resource.controller.local_upload')->public();
 
     // PDF Generator
-    $services->set('ekyna_resource.generator.pdf', PdfGenerator::class)
+    $services->set('ekyna_resource.generator.pdf', PdfGeneratorInterface::class)
         ->args([
             abstract_arg('PDF generator endpoint'),
             abstract_arg('PDF generator token'),
