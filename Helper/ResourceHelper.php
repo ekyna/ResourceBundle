@@ -8,14 +8,14 @@ use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Ekyna\Bundle\ResourceBundle\Service\ContextFactory;
 use Ekyna\Bundle\ResourceBundle\Service\Routing\RoutingUtil;
-use Ekyna\Component\Resource\Config\ActionConfig;
 use Ekyna\Component\Resource\Config\Registry\ActionRegistryInterface;
 use Ekyna\Component\Resource\Config\Registry\ResourceRegistryInterface;
 use Ekyna\Component\Resource\Config\ResourceConfig;
 use Ekyna\Component\Resource\Dispatcher\ResourceEventDispatcherInterface;
 use Ekyna\Component\Resource\Exception\LogicException;
+use Ekyna\Component\Resource\Helper\ResourceHelper as BaseHelper;
+use Ekyna\Component\Resource\Helper\ResourceHelperInterface;
 use Ekyna\Component\Resource\Manager\ManagerFactoryInterface;
-use Ekyna\Component\Resource\Manager\ResourceManagerInterface;
 use Ekyna\Component\Resource\Model\ResourceInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
@@ -37,51 +37,20 @@ use function sprintf;
  * @package Ekyna\Bundle\AdminBundle\Helper
  * @author  Étienne Dauvergne <contact@ekyna.com>
  */
-final class ResourceHelper
+final class ResourceHelper extends BaseHelper implements ResourceHelperInterface
 {
-    private ActionRegistryInterface          $actionRegistry;
-    private ResourceRegistryInterface        $resourceRegistry;
-    private ManagerFactoryInterface          $managerFactory;
-    private ResourceEventDispatcherInterface $dispatcher;
-    private ContextFactory                   $contextFactory;
-    private AuthorizationCheckerInterface    $authorization;
-    private RouterInterface                  $router;
-
     private ?PropertyAccessorInterface $accessor = null;
 
-
     public function __construct(
-        ActionRegistryInterface $actionRegistry,
-        ResourceRegistryInterface $resourceRegistry,
-        ManagerFactoryInterface $managerFactory,
-        ResourceEventDispatcherInterface $dispatcher,
-        ContextFactory $contextFactory,
-        AuthorizationCheckerInterface $authorization,
-        RouterInterface $router
+        ActionRegistryInterface                           $actionRegistry,
+        ResourceRegistryInterface                         $resourceRegistry,
+        ManagerFactoryInterface                           $managerFactory,
+        private readonly ResourceEventDispatcherInterface $dispatcher,
+        private readonly ContextFactory                   $contextFactory,
+        private readonly AuthorizationCheckerInterface    $authorization,
+        private readonly RouterInterface                  $router
     ) {
-        $this->actionRegistry = $actionRegistry;
-        $this->resourceRegistry = $resourceRegistry;
-        $this->managerFactory = $managerFactory;
-        $this->dispatcher = $dispatcher;
-        $this->contextFactory = $contextFactory;
-        $this->authorization = $authorization;
-        $this->router = $router;
-    }
-
-    /**
-     * Returns the action config for the given name.
-     */
-    public function getActionConfig(string $action): ActionConfig
-    {
-        return $this->actionRegistry->find($action);
-    }
-
-    /**
-     * Returns the configuration for the resource.
-     */
-    public function getResourceConfig(ResourceInterface|string $resource): ResourceConfig
-    {
-        return $this->resourceRegistry->find($resource);
+        parent::__construct($actionRegistry, $resourceRegistry, $managerFactory);
     }
 
     public function getUrlGenerator(): UrlGeneratorInterface
@@ -201,19 +170,6 @@ final class ResourceHelper
     }
 
     /**
-     * Returns the resource has the given action.
-     */
-    public function hasAction(ResourceInterface|string $resource, string $action): bool
-    {
-        $aCfg = $this->actionRegistry->find($action);
-
-        return $this
-            ->resourceRegistry
-            ->find($resource)
-            ->hasAction($aCfg->getClass());
-    }
-
-    /**
      * Returns the route name for the given resource and action.
      */
     public function getRoute(ResourceInterface|string $resource, string $action): string
@@ -321,11 +277,6 @@ final class ResourceHelper
         }
 
         return null;
-    }
-
-    private function getManager(string $class): ResourceManagerInterface
-    {
-        return $this->managerFactory->getManager($class);
     }
 
     private function getAccessor(): PropertyAccessorInterface

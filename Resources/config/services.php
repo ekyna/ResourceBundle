@@ -25,8 +25,8 @@ use Ekyna\Component\Resource\Bridge\Symfony\Serializer\ResourceNormalizer;
 use Ekyna\Component\Resource\Copier\Copier;
 use Ekyna\Component\Resource\Copier\CopierInterface;
 use Ekyna\Component\Resource\Helper\EnumHelper;
-use Ekyna\Component\Resource\Helper\GotenbergGenerator;
 use Ekyna\Component\Resource\Helper\PdfGeneratorInterface;
+use Ekyna\Component\Resource\Helper\ResourceHelperInterface;
 use Ekyna\Component\Resource\Import\CsvImporter;
 use Ekyna\Component\Resource\Message\MessageQueue;
 use Symfony\Component\Console\ConsoleEvents;
@@ -54,7 +54,8 @@ return static function (ContainerConfigurator $container) {
         ->tag('kernel.event_listener', ['event' => 'kernel.controller', 'method' => 'onKernelController']);
 
     // Resource helper
-    $services->set('ekyna_resource.helper', ResourceHelper::class)
+    $services
+        ->set('ekyna_resource.helper', ResourceHelper::class)
         ->args([
             service('ekyna_resource.registry.action'),
             service('ekyna_resource.registry.resource'),
@@ -64,7 +65,7 @@ return static function (ContainerConfigurator $container) {
             service('security.authorization_checker'),
             service('router'),
         ])
-        ->tag('twig.runtime'); // TODO Remove as not used
+        ->alias(ResourceHelperInterface::class, 'ekyna_resource.helper');
 
     // Resource copier
     $services->set('ekyna_resource.copier', Copier::class)
