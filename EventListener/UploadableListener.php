@@ -38,9 +38,11 @@ class UploadableListener
         }
 
         // TODO Remove (when handled by timestampable resource behavior).
-        $uploadable
-            ->setCreatedAt(new DateTime())
-            ->setUpdatedAt(new DateTime());
+        if (null === $uploadable->getCreatedAt()) {
+            $uploadable->setCreatedAt(new DateTime());
+        }
+
+        $uploadable->setUpdatedAt(new DateTime());
 
         $this->resolver->resolve($uploadable)->prepare($uploadable);
     }
